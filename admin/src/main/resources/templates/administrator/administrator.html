@@ -1,0 +1,592 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 관리자 View
+# Date   : 2020.01.21
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewCriteria'}">조회 조건</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <form id="frmSearchAdministrator">
+                    <input type="hidden" name="strSortType">
+                    <input type="hidden" name="strSortColumn">
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.adminName'}">관리자명</label>
+                            <input type="text" id="txtAdminName" name="adminName" class="form-control form-enter">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.adminID'}">관리자ID</label>
+                            <input type="text" id="txtAdminID" name="adminID" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.phoneNumber'}">휴대전화번호</label>
+                            <input type="text" id="txtCelNo" name="celNo" class="form-control" th:placeholder="#{'common.label.holderPhone'}" >
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.email'}">이메일</label>
+                            <input type="text" id="txtEmail" name="email" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.availability'}">사용 여부</label>
+                            <select id="selUseFlag" name="useFlag" class="select2 form-control">
+                                <option value="" th:text="#{'common.label.all'}">전체</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" th:text="#{'common.label.useFlag.y'}">사용</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" th:text="#{'common.label.useFlag.n'}">미사용</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer">
+                <div class="pull-right">
+                    <div>
+                        <button type="button" id="btnSearch" class="btn btn-default btn-sm" th:text="#{'common.label.search'}">조회</button>
+                        <button type="button" id="btnRegist" class="btn btn-primary btn-sm" th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'" th:text="#{'common.label.register'}">등록</button>
+                        <button type="button" id="btnExcel" class="btn btn-warning btn-sm" th:style="${#request.getAttribute('dnAvailFlag')} ? '' : 'display: none'" th:text="#{'common.label.excel'}">엑셀</button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-footer-->
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewResults'}">조회 결과</h3>
+            </div>
+            <div class="box-body" id="div_searchResult" style="display: none;">
+                <table class="table table-bordered table-striped table-width100" id="tblAdministrator">
+                    <thead>
+                        <tr>
+                            <th id="adminNo"      class="sort_header" th:text="#{'common.label.adminNo'}">관리자번호</th>
+                            <th id="adminID"      class="sort_header" th:text="#{'common.label.adminID'}">관리자 아이디</th>
+                            <th id="adminName"    class="sort_header" th:text="#{'common.label.adminName'}">관리자명</th>
+                            <th id="celNo"        class="sort_header" th:text="#{'common.label.phoneNumber'}">핸드폰번호</th>
+                            <th id="menuRoleName" class="sort_header" th:text="#{'administratorMgmt.accessAuth'}">접근 권힌</th>
+                            <th id="email"        class="sort_header" th:text="#{'common.label.email'}">이메일</th>
+                            <th id="useFlag"      class="sort_header" th:text="#{'common.label.availability'}">사용 여부</th>
+                            <th th:text="#{'common.label.work'}">작업</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+
+    <!-- BEGIN REGIST MODAL AREA -->
+    <div class="modal fade" id="divInsAdminModal" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block th:text="#{'administratorMgmt.insAdmin'}">관리자 등록</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmInsAdmin" name="frmInsAdmin">
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminID'}">관리자ID</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsAdminID" name="adminID" class="form-control" maxlength="20" th:placeholder="#{'common.label.holderID'}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminName'}">관리자명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsAdminName" name="adminName" class="form-control" maxlength="50" />
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.phoneNumber'}">핸드폰번호</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsCelNo" name="celNo" class="form-control" th:placeholder="#{'common.label.holderPhone'}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.email'}">이메일</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsEmail" name="email" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'administratorMgmt.accessAuth'}">접근 권한</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <select id="selInsMenuRoleNo" name="menuRoleNo" class="select2 form-control">
+                                    <option value="" th:text="#{'common.label.all'}">전체</option>
+                                    <option th:each="menuRole : ${menuRoleList}" th:value="${menuRole.menuRoleNo}" th:text="${menuRole.menuRoleName}" />
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" checked />
+                                        <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                        <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label" th:text="#{'administratorMgmt.useSpecificIP'}">특정 액세스IP만 사용</label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="accessIPRestrictFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                        <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="accessIPRestrictFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" checked />
+                                        <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divInsIPAddressArea" style="display: none;">
+                            <label class="form-label" th:text="#{'administratorMgmt.enterThreeIP'}">접속 IP주소 3개까지 입력</label>
+                            <div class="row form-row">
+                                <div class="col-md-4 form-group-sm">
+                                    <input type="text" id="txtInsAccessIP1" name="accessIP1" class="form-control" data-inputmask="'alias': 'ip'" data-mask />
+                                </div>
+                                <div class="col-md-4 form-group-sm">
+                                    <input type="text" id="txtInsAccessIP2" name="accessIP2" class="form-control" data-inputmask="'alias': 'ip'" data-mask />
+                                </div>
+                                <div class="col-md-4 form-group-sm">
+                                    <input type="text" id="txtInsAccessIP3" name="accessIP3" class="form-control" data-inputmask="'alias': 'ip'" data-mask />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                         <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                         <button type="button" class="btn btn-danger btn-sm" id="btnInsAdmin" th:text="#{'common.label.register'}">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END REGISTER MODAL AREA -->
+
+    <!-- BEGIN EDIT MODAL AREA -->
+    <div class="modal fade" id="divUpdAdminModal" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block th:text="#{'administratorMgmt.updAdmin'}">관리자 수정</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmUpdAdmin" name="frmUpdAdmin">
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminID'}">관리자 아이디</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdAdminID" name="adminID" class="form-control" disabled="disabled"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminName'}">관리자명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdAdminName" name="adminName" class="form-control" maxlength="50" />
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.phoneNumber'}">핸드폰번호</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdCelNo" name="celNo" class="form-control" maxlength="20" th:placeholder="#{'common.label.holderPhone'}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.email'}">이메일</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdEmail" name="email" class="form-control" maxlength="200"/>
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'administratorMgmt.accessAuth'}">접근 권한</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <select id="selUpdMenuRoleNo" name="menuRoleNo" class="select2 form-control">
+                                    <option value="" th:text="#{'common.label.all'}">전체</option>
+                                    <option th:each="menuRole : ${menuRoleList}" th:value="${menuRole.menuRoleNo}" th:text="${menuRole.menuRoleName}" />
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group-sm">
+                                <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                        <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                        <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6 form-group-sm">
+                                <label class="form-label" th:text="#{'administratorMgmt.useSpecificIP'}">특정 액세스IP만 사용</label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="accessIPRestrictFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                        <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="accessIPRestrictFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                        <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divUpdIPAddressArea" style="display: none;">
+                            <label class="form-label" th:text="#{'administratorMgmt.enterThreeIP'}">접속 IP주소 3개까지 입력</label>
+                            <div class="row form-row">
+                                <div class="col-md-4 form-group-sm">
+                                    <input type="text" id="txtUpdAccessIP1" name="accessIP1" class="form-control" data-inputmask="'alias': 'ip'" data-mask />
+                                </div>
+                                <div class="col-md-4 form-group-sm">
+                                    <input type="text" id="txtUpdAccessIP2" name="accessIP2" class="form-control" data-inputmask="'alias': 'ip'" data-mask />
+                                </div>
+                                <div class="col-md-4 form-group-sm">
+                                    <input type="text" id="txtUpdAccessIP3" name="accessIP3" class="form-control" data-inputmask="'alias': 'ip'" data-mask />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                         <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                         <button type="button" class="btn btn-danger btn-sm" id="btnUpdAdmin" th:text="#{'common.label.update'}">수정</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END EDIT MODAL AREA -->
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _objAdministratorTable;
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_ADMINISTRATOR}]]*/ '/administrator/administrator';
+    var _strMode     = _strModeIns;
+
+    $(function() {
+        fnInitPage();
+        fnSetValidate();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 페이지 초기화
+     ------------------------------------------------------------*/
+    function fnInitPage() {
+        $('[data-mask]').inputmask();
+    }
+
+    /**------------------------------------------------------------
+     * 관리자 등록/수정 유효성 이벤트
+     ------------------------------------------------------------*/
+    function fnSetValidate() {
+        var strInsFormID = "frm{0}Admin".format(_strModeIns);
+        var strUpdFormID = "frm{0}Admin".format(_strModeUpd);
+
+        var objInsValidate = {
+                FORMID  : strInsFormID,
+                VARIABLE: {
+                    adminID   : { required: true, maxlength: 20, minlength: 4, alphaNumeric: true },
+                    adminName : { required: true, maxlength: 50 },
+                    celNo     : { required: true, celNo: true },
+                    email     : { required: true, email: true },
+                    menuRoleNo: { required: true }
+               }
+        };
+        COMMON.Utils.fnSetValidate(objInsValidate);
+
+        var objUpdValidate = {
+                FORMID  : strUpdFormID,
+                VARIABLE: {
+                    adminID   : { required: true, maxlength: 20, minlength: 4, alphaNumeric: true },
+                    adminName : { required: true, maxlength: 50 },
+                    celNo     : { required: true, celNo: true },
+                    email     : { required: true, email: true },
+                    menuRoleNo: { required: true }
+               }
+        };
+        COMMON.Utils.fnSetValidate(objUpdValidate);
+    }
+
+    /**------------------------------------------------------------
+    * 이벤트
+    ------------------------------------------------------------*/
+    function fnInitEvent() {
+        // Enter 이벤트
+        COMMON.Utils.fnEnterEvent($("#frmSearchAdministrator"), "fnSearchUser");
+
+        // '조회' 버튼 이벤트
+        $("#btnSearch").on("click", fnSearchUser);
+
+        // '등록' 버튼 이벤트
+        $("#btnRegist").on("click", fnInsertSetting);
+
+        // '비밀번호 초기화' 버튼 이벤트
+        $("#tblAdministrator").on("click", "button[id='btnUpdAdminPwd']",fnResetPwd);
+
+        // '수정' 버튼 이벤트
+        $("#tblAdministrator").on("click", "button[id='btnUpdate']", fnUpdateSetting);
+
+        // 정렬 이벤트
+        $(".sort_header").on("click", function() {
+            COMMON.Utils.fnSortSettings(this, $("#frmSearchAdministrator"));
+        });
+
+        // '엑셀' 버튼 이벤트
+        $("#btnExcel").on("click", function() {
+            var strConfirmMsg = /*[[#{'common.msg.confirmDownExcel'}]]*/ '엑셀을 다운로드 하시겠습니까?';
+            COMMON.Msg.fnConfirm(strConfirmMsg, function() {
+                var strExcelPath = _strMenuPath + "/excelDownload";
+                COMMON.Utils.fnFileDownload("GET", $("#frmSearchAdministrator").serializeObject(), strExcelPath);
+            });
+        });
+
+        // 특정 액세스IP 사용 토글 클릭 이벤트
+        $("input[name='accessIPRestrictFlag']").on("click", function() {
+            var accessIPRestrictFlag = $(this).val();
+            var objSettings = $("#frm{0}Admin".format(_strMode)).validate().settings;
+
+            $("input[type='text'][name^='accessIP']").val("");
+
+            if('true' === accessIPRestrictFlag) {
+                $("#div{0}IPAddressArea".format(_strMode)).show();
+                objSettings.rules.accessIP1 = {required: true};
+            } else {
+                $("#div{0}IPAddressArea".format(_strMode)).hide();
+                delete objSettings.rules.accessIP1;
+            }
+        });
+
+        // 모달 내 '저장', '변경' 버튼 이벤트
+        $("#btnInsAdmin, #btnUpdAdmin").on("click", fnEditAdministrator);
+    }
+
+    /**------------------------------------------------------------
+    * 관리자 리스트 조회
+    ------------------------------------------------------------*/
+    function fnSearchUser() {
+        if(typeof _objAdministratorTable == "undefined") {
+            _objAdministratorTable = COMMON.Ajax.CreateDataTable("#tblAdministrator", true, {
+                url: _strMenuPath + '/selectAdministratorList',
+                data: function() {
+                    return $("#frmSearchAdministrator").serializeObject();
+                },
+                columns: [
+                    { "data": "adminNo",      "class": "td-center" },
+                    { "data": "adminID",      "class": "td-center" },
+                    { "data": "adminName",    "class": "td-center" },
+                    { "data": "celNo",        "class": "td-center" },
+                    { "data": "menuRoleName", "class": "td-center" },
+                    { "data": "email",        "class": "td-center" },
+                    { "data": "useFlag",      "class": "td-center", "render": COMMON.Utils.fnRenderFlag },
+                    { "data": null,           "class": "td-center", "render": fnRenderWork, "orderable": false }
+                ],
+                columnDefs: [
+                    {
+                        "targets": [7],
+                        "visible": COMMON.Auth.fnCheckHasAuth(/*[[${#request.getAttribute('authCode')}]]*/'', AUTHCODE.ALL)
+                    }
+                ],
+                order: [ 0, "desc" ]
+            });
+        } else {
+            _objAdministratorTable.clearPipeline();
+            _objAdministratorTable.ajax.reload();
+        }
+        
+        $("#div_searchResult").show();
+    };
+
+    /**------------------------------------------------------------
+    * 리스트 수정 랜더링 함수
+    ------------------------------------------------------------*/
+    function fnRenderWork(data) {
+        var strHtml = "<button id='btnUpdate' title='update' type='button' class='btn btn-primary btn-xs auth-all' data-adminno='{0}'><i class='fa fa-edit'></i></button>".format(data.adminNo);
+        strHtml += "&nbsp;&nbsp;";
+        strHtml += "<button data-toggle='modal' id='btnUpdAdminPwd' title='reset' type='button' class='btn btn-danger btn-xs auth-all' data-adminno='{0}' data-adminid='{1}' data-email='{2}'><i class='fa fa-undo'></i></button>".format(data.adminNo, data.adminID, data.email);
+
+        return strHtml;
+    }
+
+    /**------------------------------------------------------------
+    * 관리자 등록/수정 함수
+    ------------------------------------------------------------*/
+    function fnEditAdministrator() {
+        if(!$("#frm{0}Admin".format(_strMode)).valid()) {
+            return;
+        }
+
+        var strUpdConfirmMsg     = /*[[#{'common.msg.confirmUpd'}]]*/ '수정하시겠습니까?';
+        var strInsConfirmMsg     = /*[[#{'common.msg.confirmIns'}]]*/ '등록하시겠습니까?';
+        var strConfirmMsg        = _strMode === _strModeIns ? strInsConfirmMsg : strUpdConfirmMsg;
+
+        COMMON.Msg.fnConfirmWithModal(strConfirmMsg, "div{0}AdminModal".format(_strMode), true, function() {
+            var strCallUrl           = _strMode === _strModeIns ? _strMenuPath + "/insertAdministrator" : _strMenuPath + "/updateAdministrator";
+            var strSuccessMsg        = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+            var strErrorMsg          = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+            var accessIPRestrictFlag = $("#frm{0}Admin".format(_strMode)).find("input[name='accessIPRestrictFlag']:checked").val();
+            var useFlag              = $("#frm{0}Admin".format(_strMode)).find("input[name='useFlag']:checked").val();
+
+            var obj = {
+                requestData : {
+                    adminID              : $("#txt{0}AdminID".format(_strMode)).val(),
+                    adminPwd             : fnGeneratePwd(),
+                    adminName            : $("#txt{0}AdminName".format(_strMode)).val(),
+                    celNo                : $("#txt{0}CelNo".format(_strMode)).val(),
+                    email                : $("#txt{0}Email".format(_strMode)).val(),
+                    menuRoleNo           : $("#sel{0}MenuRoleNo".format(_strMode)).val(),
+                    accessIPRestrictFlag : accessIPRestrictFlag,
+                    accessIP1            : accessIPRestrictFlag ? $("#txt{0}AccessIP1".format(_strMode)).val() : "",
+                    accessIP2            : accessIPRestrictFlag ? $("#txt{0}AccessIP2".format(_strMode)).val() : "",
+                    accessIP3            : accessIPRestrictFlag ? $("#txt{0}AccessIP3".format(_strMode)).val() : "",
+                    useFlag              : useFlag
+                },
+                strCallUrl      : strCallUrl,
+                strCallBack     : "fnSearchUser",
+                isModalMsg      : true,
+                strSuccessMsg   : strSuccessMsg,
+                strErrorMsg     : strErrorMsg
+            };
+
+            COMMON.Ajax.fnRequest(obj);
+        });
+
+        $("#div{0}AdminModal".format(_strMode)).modal("hide");
+    }
+
+    /**------------------------------------------------------------
+    * 등록 폼 세팅 함수
+    ------------------------------------------------------------*/
+    function fnInsertSetting() {
+        _strMode  = _strModeIns;
+
+        COMMON.Utils.fnFrmReset("frmInsAdmin");
+
+        $(".toggleFlag").bootstrapToggle();
+        $("#divInsAdminModal").modal("show");
+    }
+
+    /**------------------------------------------------------------
+    * 수정 폼 세팅 함수
+    ------------------------------------------------------------*/
+    function fnUpdateSetting() {
+        _strMode = _strModeUpd;
+
+        COMMON.Utils.fnFrmReset("frmUpdAdmin");
+
+        var obj = {
+            requestData : {
+                adminNo : $(this).attr("data-adminno"),
+                length  : 1
+            },
+            strCallUrl  : _strMenuPath + '/selectAdministratorList',
+            strCallBack : function(objJson) {
+                if(objJson.intRetCode !== 0) {
+                    COMMON.Msg.fnAlert(objJson.strRetMsg);
+
+                    $("#divUpdAdminModal").modal("hide");
+                } else {
+                    var adminList = objJson.data[0];
+
+                    $("#frmUpdAdmin [id='txtUpdAdminID']").val(adminList.adminID);
+                    $("#frmUpdAdmin [id='txtUpdAdminName']").val(adminList.adminName);
+                    $("#frmUpdAdmin [id='txtUpdCelNo']").val(adminList.celNo);
+                    $("#frmUpdAdmin [id='txtUpdEmail']").val(adminList.email);
+                    $("#frmUpdAdmin [id='selUpdMenuRoleNo']").select2("val", adminList.menuRoleNo);
+                    $("#frmUpdAdmin [name='accessIPRestrictFlag'][value='{0}']".format(adminList.accessIPRestrictFlag)).prop("checked", true);
+                    if(true === adminList.accessIPRestrictFlag) {
+                        $("#frmUpdAdmin [id='txtUpdAccessIP1']").val(adminList.accessIP1);
+                        $("#frmUpdAdmin [id='txtUpdAccessIP2']").val(adminList.accessIP2);
+                        $("#frmUpdAdmin [id='txtUpdAccessIP3']").val(adminList.accessIP3);
+                        $("#frmUpdAdmin [id='divUpdIPAddressArea']").show();
+                    }
+                    $("#frmUpdAdmin [name='useFlag'][value='{0}']".format(adminList.useFlag)).prop("checked", true);
+
+                    $("#divUpdAdminModal").modal("show");
+                }
+            },
+            isModalMsg : false
+        };
+
+        COMMON.Ajax.fnRequest(obj);
+    }
+
+    /**------------------------------------------------------------
+    * 비밀번호 초기화 함수
+    ------------------------------------------------------------*/
+    function fnResetPwd() {
+        var strMsg        = /*[[#{'administratorMgmt.msgResetPassword'}]]*/ '의 비밀번호를 초기화 하시겠습니까?';
+        var strAlertMsg   = $(this).attr("data-adminid") + strMsg;
+        var strSuccessMsg = /*[[#{'administratorMgmt.msgMailSent'}]]*/ '비밀번호 초기화 메일이 전송되었습니다.';
+        var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+        var obj = {
+                requestData : {
+                    adminNo : $(this).attr("data-adminno"),
+                    adminID : $(this).attr("data-adminid"),
+                    email   : $(this).attr("data-email")
+                },
+                strCallUrl    : _strMenuPath + "/resetAdministratorPwd",
+                strCallBack   : "fnSearchUser",
+                isModalMsg    : true,
+                strSuccessMsg : strSuccessMsg,
+                strErrorMsg   : strErrorMsg
+        };
+
+        COMMON.Msg.fnConfirm(strAlertMsg, function() {
+            COMMON.Ajax.fnRequest(obj);
+        });
+    }
+
+    /**------------------------------------------------------------
+    * 랜덤 영문자 리턴 함수
+    ------------------------------------------------------------*/
+    function fnGeneratePwd() {
+        var length  = 8;
+        var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var retVal  = "!0a";
+
+        for (var i=0, n=charset.length; i<length; ++i) {
+            retVal += charset.charAt(Math.floor(Math.random() * n));
+        }
+
+        return retVal;
+    }
+
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

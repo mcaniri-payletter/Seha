@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 로그인 Mapper ■ payletter ■ 2018. 4. 6.
+     ################################################### -->
+<mapper namespace="login">
+<!-- ##################################################
+    # 로그인 정보 수정 (성공)
+    ################################################### -->
+    <update id="updateLoginInfo" parameterType="Login">
+        -- login.updateLoginInfo : 로그인 정보 수정
+        UPDATE TAdminMgmt
+        SET    lastLoginDate = NOW()
+              ,lastLoginIP   = #{ipAddr}
+        WHERE  adminID       = #{adminID}
+    </update>
+</mapper>

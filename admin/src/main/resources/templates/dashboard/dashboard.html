@@ -1,0 +1,143 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 대시보드 View
+# Date   : 2020.04.13
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <br/><br/><br/>
+        <div class="container-fluid">
+            <!-- Small boxes (Stat box) -->
+            <div class="row">
+                <div class="col-lg-6 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3 id="hTodayPaymentAmountChart" th:text="${dashboard.todayPaymentAmount}"></h3>
+                            <p th:text="#{'dashboard.todayPaymentAmount'}">당일 결제 금액</p>
+                        </div>
+                        <div class="icon"><i class="ion ion-card"></i></div>
+                        <a href="/transaction/cashChargeList/cashChargeList" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3 id="hTodayPurchaseAmountChart" th:text="${dashboard.todayPurchaseAmount}"></h3>
+                            <p th:text="#{'dashboard.todayPurchaseAmount'}">당일 구매 금액</p>
+                        </div>
+                        <div class="icon"><i class="ion ion-happy"></i></div>
+                        <a href="/transaction/purchaseList/purchaseList" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/><br/><br/>
+        <div class="form-group row form-row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header">
+                        <i class="fa fa-chevron-circle-right"></i>
+                        <h3 class="box-title" th:text="#{'dashboard.timezoneCashCharge'}">시간대별 캐시충전</h3>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="box-body" id="divTimezoneCashChargeChart" style="height: 500px; text-align: center; display: none;"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header">
+                        <i class="fa fa-chevron-circle-right"></i>
+                        <h3 class="box-title" th:text="#{'dashboard.timezoneItemPurchase'}">시간대별 아이템 구매</h3>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="box-body" id="divTimezoneItemPurchase" style="height: 500px; text-align: center; display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</th:block>
+<th:block layout:fragment="customJS">
+    <!-- BEGIN CORE JS -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var timezoneCashChargeList   = /*[[${dashboard.timezoneCashChargeList}]]*/ '';
+        var timezonePurchaseItemList = /*[[${dashboard.timezonePurchaseItemList}]]*/ '';
+
+        $(function() {
+            fnCreateCashChargeChart();
+            fnCreatePurchaseItemChart();
+        });
+
+        /**------------------------------------------------------------
+         * 시간대별 캐시 충전 그래프
+         ------------------------------------------------------------*/
+        function fnCreateCashChargeChart() {
+            var arrBarData = [];
+            var arrYLabel  = [];
+            var objJsonData;
+
+            if(0 < timezoneCashChargeList.length) {
+                for(var i = 0; i < timezoneCashChargeList.length; i++) {
+                    var cashAttrCode = timezoneCashChargeList[i].cashAttrCode;
+                    var str = '{"xLabel": "' + timezoneCashChargeList[i].paymentTime  +'", "' + cashAttrCode + '": "' + timezoneCashChargeList[i].totalCashAmt + '"}';
+
+                    objJsonData = JSON.parse(str);
+
+                    arrBarData.push(objJsonData);
+                    arrYLabel.push(timezoneCashChargeList[i].cashAttrCode);
+                }
+
+                COMMON.Utils.fnCreateBarChart("divTimezoneCashChargeChart", arrBarData, Array.from(new Set(arrYLabel)));
+            } else {
+                $("#divTimezoneCashChargeChart").text(/*[[${#messages.msg('dashboard.msg.noChargeData')}]]*/ '당일 캐시 충전 데이터가 없습니다.');
+            }
+
+            $("#divTimezoneCashChargeChart").show();
+        }
+
+        /**------------------------------------------------------------
+         * 시간대별 아이템 구매 그래프
+         ------------------------------------------------------------*/
+        function fnCreatePurchaseItemChart() {
+            var arrLineData  = [];
+            var arrYLabel    = [];
+            var objJsonData;
+
+            if(0 < timezonePurchaseItemList.length) {
+                for(var i = 0; i < timezonePurchaseItemList.length; i++) {
+                    var itemName = timezonePurchaseItemList[i].itemName;
+                    var str = '{"xLabel": "' + timezonePurchaseItemList[i].paymentTime  +'", "' + itemName + '": "' + timezonePurchaseItemList[i].totalPurchaseCnt + '"}';
+
+                    objJsonData = JSON.parse(str);
+
+                    arrLineData.push(objJsonData);
+                    arrYLabel.push(timezonePurchaseItemList[i].itemName);
+                }
+
+                COMMON.Utils.fnCreateLineChart("divTimezoneItemPurchase", arrLineData, Array.from(new Set(arrYLabel)), null);
+            } else {
+                $("#divTimezoneItemPurchase").text(/*[[${#messages.msg('dashboard.msg.noPurchaseData')}]]*/ '당일 아이템 구매 데이터가 없습니다.');
+            }
+
+            $("#divTimezoneItemPurchase").show();
+        }
+
+        /*]]>*/
+    </script>
+    <!-- END CORE JS -->
+</th:block>
+</html>

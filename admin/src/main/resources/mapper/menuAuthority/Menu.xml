@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 메뉴 Mapper ■ payletter ■ 2018. 4. 6.
+     ################################################## -->
+<mapper namespace="menu">
+<!-- ##################################################
+    # 메뉴 목록 조회
+    ################################################### -->
+    <select id="selectMenuList" resultType="Menu">
+        -- menu.selectMenuList : 메뉴 목록 조회
+        SELECT AMM.menuNo
+              ,AMM.menuGroupNo
+              ,AMM.menuName
+              ,AMM.menuDivSgmnt
+              ,AMM.menuLink
+              ,AMM.menuDesc
+              ,AMM.sortNo
+              ,AMM.useFlag
+              ,AMM.adminNo
+              ,AM.adminID
+              ,TO_CHAR(AMM.regDate,'YYYY-MM-DD HH24:MI:SS') AS regDate
+              ,TO_CHAR(AMM.updDate,'YYYY-MM-DD HH24:MI:SS') AS updDate
+        FROM   TAdminMenuMgmt AMM
+        LEFT OUTER JOIN TAdminMgmt AM ON (AMM.adminNo = AM.adminNo)
+        <where>
+            <if test="menuGroupNo != null and menuGroupNo != ''">
+                <![CDATA[
+                    AND menuGroupNo = #{menuGroupNo}
+                ]]>
+            </if>
+            <if test="menuNo != null and menuNo != ''">
+                <![CDATA[
+                    AND menuNo = #{menuNo}
+                ]]>
+            </if>
+        </where>
+        ORDER BY sortNo
+    </select>
+
+<!-- ##################################################
+    # 메뉴 Merge
+    ################################################### -->
+    <update id="mergeMenu" parameterType="Menu">
+        <selectKey keyProperty="createSortNo" resultType="short" order="BEFORE">
+            SELECT COALESCE(MAX(sortNo), 0) + 1
+            FROM   TAdminMenuMgmt
+            WHERE  menuGroupNo = #{menuGroupNo}
+        </selectKey>
+            -- menu.mergeMenu : 메뉴 Merge
+            WITH MERGE AS (
+                UPDATE TAdminMenuMgmt
+                SET menuName     = #{menuName}
+                   ,menuDivSgmnt = #{menuDivSgmnt}
+                   ,menuLink     = #{menuLink}
+                   ,menuDesc     = #{menuDesc}
+                   ,useFlag      = #{useFlag}
+                   ,adminNo      = #{adminNo}
+                   ,updDate      = NOW()
+                WHERE menuNo = #{menuNo}
+                RETURNING *
+            )
+            INSERT INTO TAdminMenuMgmt(menuGroupNo, menuName, menuDivSgmnt, menuLink, menuDesc
+                                      ,sortNo, useFlag, adminNo)
+            SELECT #{menuGroupNo}, #{menuName}, #{menuDivSgmnt}, #{menuLink}, #{menuDesc}
+                  ,#{createSortNo}, #{useFlag}, #{adminNo}
+            WHERE NOT EXISTS (SELECT * FROM MERGE)
+    </update>
+
+<!-- ##################################################
+    # 메뉴 목록 수정
+    ################################################### -->
+    <update id="updateMenuList" parameterType="Menu">
+        -- menu.updateMenuList : 메뉴 목록 수정
+        UPDATE TAdminMenuMgmt
+        SET    sortNo         = #{sortNo}
+              ,useFlag        = #{useFlag}
+              ,adminNo        = #{adminNo}
+              ,updDate        = NOW()
+        WHERE  menuNo         = #{menuNo}
+    </update>
+
+<!-- ##################################################
+    # 메뉴 정렬 순서 조정
+    ################################################### -->
+    <update id="updateSortNo" parameterType="Menu">
+        -- menu.updateSortNo : 메뉴 삭제 후 Sort 업데이트
+        UPDATE TAdminMenuMgmt
+        SET    sortNo         = sortNo - 1
+              ,adminNo        = #{adminNo}
+              ,updDate        = NOW()
+        WHERE  menuGroupNo    = #{menuGroupNo}
+        <![CDATA[
+            AND    sortNo     > #{sortNo}
+        ]]>
+    </update>
+</mapper>

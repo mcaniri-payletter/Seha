@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" oncontextmenu="return false">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="text/html;charset=UTF-8" />
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <title th:text="${@environment.getProperty('browser.title')}"></title>
+        <!-- 공통 CSS 영역 -->
+        <th:block th:include="layout/config :: common_css"></th:block>
+        <!-- Custom CSS 영역 -->
+        <th:block layout:fragment="customCSS"></th:block>
+        <!-- 공통 Javascript 영역 -->
+        <th:block th:include="layout/config :: common_js"></th:block>
+    </head>
+    <body class="hold-transition skin-black sidebar-mini">
+        <div class="wrapper">
+            <!-- Header 영역 -->
+            <th:block th:replace="layout/header :: headerFragment"></th:block>
+            <!-- Left 영역 -->
+            <aside th:replace="layout/leftMenu :: leftMenuFragment"></aside>
+            <!-- Body 영역 -->
+            <div class="content-wrapper">
+                <th:block th:replace="layout/contentHeader :: contentHeaderFragment"></th:block>
+                <th:block layout:fragment="content"></th:block>
+            </div>
+            <!-- Modal 영역 -->
+            <th:block th:replace="layout/modal :: modalFragment"></th:block>
+            <!-- 공통 스크립트 처리 영역 -->
+            <th:block th:replace="layout/script :: scriptFragment"></th:block>
+            <!-- Custom javascript 영역 -->
+            <th:block layout:fragment="customJS"></th:block>
+        </div>
+    </body>
+</html>

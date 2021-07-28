@@ -1,0 +1,109 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 샘플 상세
+# Date   : 2021.07.15
+#------------------------------------------------------------------------>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <!-- BEGIN BASIC INFO AREA -->
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">기본 정보</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-striped table-width100">
+                    <colgroup>
+                        <col width="17%">
+                        <col width="17%">
+                        <col width="17%">
+                        <col width="17%">
+                        <col width="16%">
+                        <col width="*">
+                    </colgroup>
+                    <tr>
+                        <td class="text-center bg-info td-item">회원 번호</td>
+                        <td class="text-center" td-id="td_userKey"></td>
+                        <td class="text-center bg-info td-item">사용자 명</td>
+                        <td class="text-center" td-id="td_userName"></td>
+                        <td class="text-center bg-info td-item">로그인 아이디</td>
+                        <td class="text-center" td-id="td_loginId" id="tdLoginID"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- END BASIC INFO AREA -->
+
+        <!-- BEGIN DETAIL INFO AREA -->
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">상세 정보</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-striped table-width100">
+                    <colgroup>
+                        <col width="20%">
+                        <col width="30%">
+                        <col width="20%">
+                        <col width="30%">
+                    </colgroup>
+                    <tr>
+                        <td class="text-center bg-info td-item">항목명</td>
+                        <td class="text-left" td-id="td_column1" colspan="3">'td-id' 속성 값은 'td_컬럼명' 으로 지정 (Auto Mapping을 위함)</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center bg-info td-item">항목명</td>
+                        <td class="text-right" td-id="td_column2">오른쪽 정렬</td>
+                        <td class="text-center bg-info td-item">항목명</td>
+                        <td class="text-center" td-id="td_column3">가운데 정렬</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- END DETAIL INFO AREA -->
+        <!-- /.box-body -->
+        <div class="box">
+            <div class="box-footer">
+                <div class="pull-right">
+                    <button type="button" id="btnGoListSample" class="btn btn-default btn-sm" th:text="#{'common.label.list'}">목록</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _authCode = /*[[${#request.getAttribute('authCode')}]]*/'';
+
+    $(function() {
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 이벤트 초기화
+     ------------------------------------------------------------*/
+    function fnInitEvent() {
+        // '목록' 버튼 이벤트
+        $("#btnGoListSample").on("click", function() {
+            COMMON.Navi.fnGoMenu(MENU.Sample);
+        });
+    }
+
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

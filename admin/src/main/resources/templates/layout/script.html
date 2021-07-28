@@ -1,0 +1,114 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 기본 스크립트 영역
+# Date   : 2018.09.28
+#------------------------------------------------------------------------>
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <script th:fragment="scriptFragment" th:inline="javascript">
+
+        var _strModeIns  = /*[[${T(com.sbank.admin.common.constants.GlobalConstants).MODE_INS}]]*/ 'Ins';
+        var _strModeUpd  = /*[[${T(com.sbank.admin.common.constants.GlobalConstants).MODE_UPD}]]*/ 'Upd';
+        var _authCode    = /*[[${#request.getAttribute('authCode')}]]*/ '';
+        var _todayDate   = /*[[${#request.getAttribute('strToYMD')}]]*/ '';
+
+        /*<![CDATA[*/
+        $(function(){
+            fnSetInitPwdFormValidate();
+            fnEvent();
+        });
+
+        function fnSetInitPwdFormValidate() {
+            var arrValidate = {
+                FORMID   : "frmPwdChange",
+                VARIABLE : {
+                    currPwd  : { required: true, maxlength:20, minlength:8 },
+                    newPwd   : { required: true, maxlength:20, minlength:8, passwordCheck:true, pwCheckConsecChars:true },
+                    reNewPwd : { required: true, maxlength:20, minlength:8, equalTo:"#inpNewPwd", passwordCheck:true, pwCheckConsecChars:true }
+                }
+            }
+
+            COMMON.Utils.fnSetValidate(arrValidate);
+        }
+
+        function fnEvent() {
+            $(".select2").select2();
+
+            $(".modal").on("shown.bs.modal", function() {
+                $(".modal-body").scrollTop(0);
+            });
+
+            // 공통 Alert
+            $("#btnAlertModalTop, #btnAlertModalBottom").on("click", function() {
+                $('#alertModal').modal('hide');
+
+                if(strPreModalId != "" && strPreModalId != undefined && isPreModalOpen == true) {
+                    $('#' + strPreModalId).modal('show');
+                    strPreModalId = "";
+                }
+            });
+
+            // 공통 Confirm
+            $("#btnConfirmModalTop, #btnConfirmModalBottm").on("click", function() {
+                $('#confirmModal').modal('hide');
+
+                if(strPreModalId != "" && strPreModalId != undefined && isPreModalOpen == true) {
+                    $('#' + strPreModalId).modal('show');
+                    strPreModalId = "";
+                }
+            });
+
+            // Header 영역 > '비밀번호 변경' 클릭 이벤트
+            $("#aChangePassword").on("click", function() {
+                COMMON.Utils.fnFrmReset("frmPwdChange");
+                $('#btnModalPwdChange').click();
+            });
+
+            // Header 영역 > '로그아웃' 클릭 이벤트
+            $("#aLogout").on("click", function() {
+                COMMON.Navi.fnGoLogout();
+                // var obj = {
+                //     strCallUrl: "/login/logout"
+                // }
+                //
+                // COMMON.Ajax.fnRequest(obj);
+            });
+
+            $("#btnChangePwd").on("click", function() {
+                if(!$("#frmPwdChange").valid()) {
+                    return;
+                }
+
+                var adminID = /*[[${#request.getAttribute('adminID')}]]*/ 'payletter';
+                var obj = {
+                    requestData : {
+                        adminID : adminID,
+                        currPwd : $("#inpCurrPwd").val(),
+                        newPwd  : $("#inpNewPwd").val(),
+                        reNewPwd: $("#inpReNewPwd").val()
+                    },
+                    strCallUrl  : "/administrator/administrator/changePwd",
+                    strCallBack : "fnChangePwdRet"
+                };
+
+                COMMON.Ajax.fnRequest(obj);
+            });
+        }
+
+        function fnChangePwdRet(objJson) {
+            var strSuccessMsg = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+            var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+
+            if(objJson.intRetCode != 0) {
+                COMMON.Msg.fnAlertWithModal(strErrorMsg + "(" + objJson.strRetMsg + ")", "pwdChangeModal", true);
+            } else {
+                $("#pwdChangeModal").modal('hide');
+
+                COMMON.Msg.fnAlert(strSuccessMsg, function(){document.location.reload();}, null);
+                COMMON.Utils.fnFrmReset("frmPwdChange");
+            }
+        }
+
+        /*]]>*/
+    </script>
+</html>

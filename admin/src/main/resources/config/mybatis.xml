@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <typeAliases>
+        <typeAlias alias="FixTypeHandler" type="com.sbank.admin.common.database.FixTypeHandler" />
+
+        <!-- common Alias START -->
+        <typeAlias alias="hashMap" type="java.util.HashMap" />
+        <typeAlias alias="linkedHashMap" type="java.util.LinkedHashMap" />
+        <typeAlias alias="map"     type="java.util.Map" />
+        <typeAlias alias="list"    type="java.util.List" />
+        <package name="com.sbank.admin.common.domain"/>
+        <!-- common Alias END   -->
+
+        <package name="com.sbank.admin.administrator.domain"/>
+        <package name="com.sbank.admin.login.domain"/>
+        <package name="com.sbank.admin.menuauthority.domain"/>
+    </typeAliases>
+</configuration>
+

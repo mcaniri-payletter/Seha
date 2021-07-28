@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 대시보드 Mapper ■payletter ■ 2020. 04. 13
+     ################################################### -->
+<mapper namespace="dashboard">
+<!-- ##################################################
+    # 당일 결제 금액 조회
+    ################################################### -->
+    <select id="selectTodayPaymentAmount" resultType="BigDecimal">
+        -- dashboard.selectTodayPaymentAmount : 당일 결제 금액 조회
+        SELECT COALESCE(SUM(payAmt), 0) AS todayPaymentAmount
+        FROM  TCashMst
+        WHERE payYMD = CURRENT_DATE
+    </select>
+
+<!-- ##################################################
+    # 당일 구매 금액 조회
+    ################################################### -->
+    <select id="selectTodayPurchaseAmount" resultType="BigDecimal">
+        -- dashboard.selectTodayPurchaseAmount : 당일 구매 금액 조회
+        SELECT COALESCE(SUM(purchasePrice), 0) AS todayPurchaseAmount
+        FROM  TPurchaseMst
+        WHERE purchaseYMD = CURRENT_DATE
+    </select>
+
+<!-- ##################################################
+    # 시간대별 캐시 충전 조회
+    ################################################### -->
+    <select id="selectTimezoneCashCharge" resultType="Dashboard">
+        -- dashboard.selectTimezoneCashCharge : 시간대별 캐시 충전 조회
+        <![CDATA[
+        SELECT paymentTime
+              ,cashAttrCode
+              ,SUM(sumCashAmt) AS totalCashAmt
+        FROM (
+            SELECT CONCAT(TO_CHAR(regDate,'%H'), ':00 ~ ' ,TO_CHAR(regDate,'%H'), ':59') as paymentTime
+                    ,cashAttrCode
+                    ,SUM(cashAmt) AS sumCashAmt
+            FROM  TCashMst
+            WHERE payYMD = CURRENT_DATE
+            GROUP BY paymentTime, cashAttrCode
+
+            UNION ALL
+
+            SELECT TMilitaryTimeMgmt.militaryTime, CM.cashAttrCode, 0 AS totalCashAmt
+            FROM (
+                SELECT militaryTime
+                FROM TMilitaryTimeMgmt
+                WHERE seqNo <= TO_CHAR(CURRENT_TIME, '%H') + 1) TMilitaryTimeMgmt
+                INNER JOIN (
+                    SELECT cashAttrCode
+                    FROM  TCashMst
+                    WHERE payYMD = CURRENT_DATE
+                    GROUP BY cashAttrCode
+                ) CM
+            ) outerTBL
+        GROUP BY paymentTime, cashAttrCode
+        ]]>
+    </select>
+
+<!-- ##################################################
+    # 시간대별 아이템 구매 조회
+    ################################################### -->
+    <select id="selectTimezonePurchaseItem" resultType="Dashboard">
+        -- dashboard.selectTimezonePurchaseItem : 시간대별 아이템 구매 조회
+        <![CDATA[
+        SELECT paymentTime
+              ,IM.itemName
+              ,SUM(totalPurchaseCnt) AS totalPurchaseCnt
+        FROM (
+            SELECT CONCAT(TO_CHAR(PM.regDate,'%H'), ':00 ~ ' ,TO_CHAR(PM.regDate,'%H'), ':59') as paymentTime
+                  ,IM.itemNo
+                  ,SUM(PM.itemCnt) AS totalPurchaseCnt
+            FROM       TPurchaseMst PM
+            INNER JOIN TItemMgmt    IM ON PM.itemNo = IM.itemNo
+            WHERE PM.purchaseYMD = CURRENT_DATE
+            GROUP BY paymentTime, PM.ItemNo
+
+            UNION ALL
+
+            SELECT TMilitaryTimeMgmt.militaryTime, PM.itemNo, 0 AS totalPurchaseCnt
+            FROM (
+                SELECT militaryTime
+                FROM TMilitaryTimeMgmt
+                WHERE seqNo <= TO_CHAR(CURRENT_TIME, '%H') + 1
+                ) TMilitaryTimeMgmt
+                INNER JOIN (
+                    SELECT itemNo
+                    FROM  TPurchaseMst
+                    WHERE purchaseYMD = CURRENT_DATE
+                    GROUP BY itemNo
+                ) PM
+            ) outerTBL
+        INNER JOIN TItemMgmt IM ON outerTBL.itemNo = IM.itemNo
+        GROUP BY paymentTime, outerTBL.itemNo
+        ]]>
+    </select>
+</mapper>

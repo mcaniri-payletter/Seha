@@ -1,0 +1,150 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 샘플 편집
+# Date   : 2021.07.16
+#------------------------------------------------------------------------>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <div class="box-title">
+
+        </div>
+        <!-- BEGIN BASIC INFO AREA -->
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">DIV TYPE</h3>
+            </div>
+            <div class="box-body">
+                <form id="frmEditSample1" name="frmEditSample1">
+                    <input type="hidden" id="hidEditMode" name="editMode" th:value="${EDIT_MODE}" />
+                    <input type="hidden" id="hidMenuNo" name="menuNo" th:value="${menu.menuNo}" />
+                    <input type="hidden" id="hidMenuGroupNo" name="menuGroupNo" />
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-2 text-right">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuNameCode'}">메뉴 명 코드</span> <i class="fa fa-asterisk text-danger"></i></label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="txtMenuName" data-toggle="tooltip" name="menuName" class="form-control" maxlength="50"/>
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-2 text-right">
+                            <label class="form-label"><span th:text="#{'common.label.menuLink'}">메뉴 Link</span> <i class="fa fa-asterisk text-danger"></i></label>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" id="txtMenuLink" name="menuLink" class="form-control" maxlength="100"/>
+                        </div>
+                        <div class="col-md-2 text-right">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuURISegment'}">메뉴 URI Segment</span> <i class="fa fa-asterisk text-danger"></i></label>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" id="txtMenuDivSgmnt" name="menuDivSgmnt" class="form-control" maxlength="100" required/>
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-2 text-right">
+                            <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                    <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                    <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- END BASIC INFO AREA -->
+
+        <!-- /.box-body -->
+        <div class="box">
+            <div class="box-footer">
+                <div class="pull-right">
+                    <button type="button" class="btn btn-default btn-sm" id="btnCnlSample" th:text="#{'common.label.cancel'}">취소</button>
+                    <th:block th:switch="${EDIT_MODE}">
+                        <button type="button" class="btn btn-danger btn-sm" th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_INS}" id="btnInsSample" th:text="#{'common.label.register'}">등록</button>
+                        <button type="button" class="btn btn-danger btn-sm" th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_UPD}" id="btnUpdSample" th:text="#{'common.label.update'}">수정</button>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </section>
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_MENU}]]*/ '/menuAuthority/menu';
+    var _authCode = /*[[${#request.getAttribute('authCode')}]]*/'';
+    var _strMode = $("#hidEditMode").val();
+
+    $(function() {
+        fnInitPage();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 페이지 초기화
+     ------------------------------------------------------------*/
+    function fnInitPage() {
+        // 수정 화면일 경우, 상세 정보 조회
+        if(_strMode ==  /*[[${T(com.sbank.admin.common.constants.GlobalConstants).MODE_UPD}]]*/ 'Upd') {
+            var menuNo = $("#hidMenuNo").val();
+            fnGetSampleInfo(menuNo);
+        }
+    }
+
+    /**------------------------------------------------------------
+     * 이벤트 초기화
+     ------------------------------------------------------------*/
+    function fnInitEvent() {
+        // '취소' 버튼 이벤트
+        $("#btnCnlSample").on("click", function() {
+            COMMON.Navi.fnGoMenu(MENU.Sample);
+        });
+    }
+
+    /**------------------------------------------------------------
+     * 상세 정보 조회
+     ------------------------------------------------------------*/
+    function fnGetSampleInfo(menuNo) {
+        var obj = {
+            requestData: {
+                menuNo: menuNo
+            },
+            strCallUrl: _strMenuPath + "/selectMenuList",
+            strCallBack: function(objJson) {
+                if(objJson.intRetCode !== 0) {
+                    COMMON.Msg.fnAlert(objJson.strRetMsg);
+                } else {
+                    var menu = objJson.data[0];
+
+                    // input 항목 값 자동 Mapping
+                    COMMON.Utils.fnFrmSettings("frmEditSample1", menu);
+
+                    $("#frmEditSample1 [name='useFlag'][value='{0}']".format(menu.useFlag)).prop("checked", true);
+                }
+            },
+            isModalMsg: false
+        };
+
+        COMMON.Ajax.fnRequest(obj);
+    }
+    /*]]>*/
+</script>
+</th:block>
+</html>

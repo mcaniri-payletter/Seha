@@ -1,0 +1,809 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 샘플 View
+# Date   : 2021.07.14
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <!-- DDLB -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">DDLB</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="row form-row">
+                    <div class="col-md-12">
+                        <span class="text-red">&nbsp * 상세 설정은 SampleController 참조</span>
+                    </div>
+                </div>
+                <div class="row form-row form-group-sm">
+                    <div class="col-md-3">
+                        <label class="form-label">조건 없음, 단일 선택</label>
+                        <select name="sample1-1" id="selSample1-1" class="select2 form-control">
+                            <option value="" selected th:text="#{'common.label.select'}">선택</option>
+                            <option th:each="sample : ${list1}" th:value="${sample.codeID}" th:text="${sample.codeName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">조건 없음, 다중 선택</label>
+                        <select name="sample1-2" id="selSample1-2" class="select2 form-control" data-th-placeholder="#{'common.label.select'}" multiple="multiple">
+                            <option th:each="sample : ${list1}" th:value="${sample.codeID}" th:text="${sample.codeName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">조건 있음 (사용 여부 : '사용')</label>
+                        <select name="sample2" id="selSample2" class="select2 form-control">
+                            <option value="" selected th:text="#{'common.label.select'}">선택</option>
+                            <option th:each="sample : ${list2}" th:value="${sample.codeID}" th:text="${sample.codeName}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">조건 있음 (사용 여부 : '사용', 추가 검색 조건 : 'ko' 만)</label>
+                        <select name="sample3" id="selSample3" class="select2 form-control">
+                            <option value="" selected th:text="#{'common.label.select'}">선택</option>
+                            <option th:each="sample : ${list3}" th:value="${sample.codeID}" th:text="${sample.codeName}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DatePicker -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">DatePicker</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <form id="frmSearchSample">
+                    <div class="row form-row">
+                        <div class="col-md-12">
+                            <span class="text-red">&nbsp * 상세 설정은 sample.html 하단 script 참조</span>
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label">단일 (기본)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control pl-datepicker" id="txtSelectYMD1" th:value="${#request.getAttribute('strToYMD')}">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">단일 (날짜 제한)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control pl-datepicker" id="txtSelectYMD2" th:value="${#request.getAttribute('strToYMD')}">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">단일 (년월만)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control pl-datepicker" id="txtSelectYMD3" th:value="${#request.getAttribute('strToYM')}">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">기간</label>
+                            <div class="input-group">
+                                <input type="hidden" id="hidFromYMD" name="strFromYMD" th:value="${#request.getAttribute('strFromYMD')}">
+                                <input type="hidden" id="hidToYMD" name="strToYMD" th:value="${#request.getAttribute('strToYMD')}">
+                                <input type="text" class="form-control pull-right" id="txtRangeYMD">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Elements -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">Elements</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="row form-row">
+                    <div class="col-md-3">
+                        <label class="form-label">버튼 크기&nbsp;&nbsp;</label>
+                        <div>
+                            <button type="button" class="btn btn-primary btn-xs">btn-xs</button>
+                            <button type="button" class="btn btn-primary btn-sm">btn-sm</button>&nbsp;&nbsp;
+                            <button type="button" class="btn btn-primary btn-lg">btn-lg</button>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">버튼 색상&nbsp;&nbsp;</label>
+                        <div>
+                            <button type="button" class="btn btn-info btn-sm">btn-info</button>
+                            <button type="button" class="btn btn-primary btn-sm">btn-primary</button>
+                            <button type="button" class="btn btn-danger btn-sm">btn-danger</button>
+                            <button type="button" class="btn btn-default btn-sm">btn-default</button>
+                            <button type="button" class="btn btn-success btn-sm">btn-success</button>
+                            <button type="button" class="btn btn-warning btn-sm">btn-warning</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-row">
+                    <div class="col-md-3">
+                        <label class="form-label">기본 버튼&nbsp;&nbsp;</label>
+                        <div>
+                            <button type="button" class="btn btn-default btn-sm">조회</button>
+                            <button type="button" class="btn btn-default btn-sm">취소</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">중요 버튼&nbsp;&nbsp;</label>
+                        <div>
+                            <button type="button" class="btn btn-danger btn-sm">등록</button>
+                            <button type="button" class="btn btn-danger btn-sm">수정</button>
+                            <button type="button" class="btn btn-danger btn-sm">삭제</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">기능 버튼&nbsp;&nbsp;</label>
+                        <div>
+                            <button type="button" class="btn btn-warning btn-sm">엑셀</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-row">
+                    <div class="col-md-1">
+                        <label class="form-label">토글 크기&nbsp;&nbsp;</label>
+                        <div class="toggle-len3"><input type="checkbox" class="btn-danger" data-toggle="toggle" data-size="normal" data-on="가나다" data-off="가나다" checked></div>
+                    </div>
+                    <div class="col-md-10">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="toggle-len5"><input type="checkbox" class="btn-danger" data-toggle="toggle" data-size="normal" data-on="가나다라마바사아자차" data-off="가나다라마바사아자차" checked></div>
+                    </div>
+                </div>
+                <div class="row form-row">
+                    <div class="col-md-12">
+                        <span class="text-red">&nbsp * 토글 : 토글 내 글자 수 10자리까지 설정 가능 (class : toggle-len3 ~ toggle-len10)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- List -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">List, Modal, Validation</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <form id="frmSearchAdministrator">
+                    <input type="hidden" name="strSortType">
+                    <input type="hidden" name="strSortColumn">
+                    <div class="row form-row">
+                        <div class="col-md-12">
+                            <span class="text-red">&nbsp * 목록 조회 후, '관리자 아이디' 항목 값을 통해 상세 화면 진입 가능</span><br>
+                            <span class="text-red">&nbsp * Validation : Modal 내 '등록' / '수정' 기능을 통해 확인 가능</span><br>
+                            <span class="text-red">&nbsp * Excel : 현 검색 조건을 기반으로 조회한 데이터 다운로드</span><br>
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.adminName'}">관리자명</label>
+                            <input type="text" id="txtAdminName" name="adminName" class="form-control form-enter">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.availability'}">사용 여부</label>
+                            <select id="selUseFlag" name="useFlag" class="select2 form-control">
+                                <option value="" th:text="#{'common.label.all'}">전체</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" th:text="#{'common.label.useFlag.y'}">사용</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" th:text="#{'common.label.useFlag.n'}">미사용</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer">
+                <div class="pull-right">
+                    <div>
+                        <button type="button" id="btnSearchSample" class="btn btn-default btn-sm" th:text="#{'common.label.search'}">조회</button>
+                        <button type="button" id="btnShowRegistSample" class="btn btn-primary btn-sm" th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'" th:text="#{'common.label.register'}">등록</button>
+                        <button type="button" id="btnExcel" class="btn btn-warning btn-sm" th:style="${#request.getAttribute('dnAvailFlag')} ? '' : 'display: none'" th:text="#{'common.label.excel'}">엑셀</button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-footer-->
+            <div class="box-body" id="div_searchResult" style="display: none;">
+                <table class="table table-bordered table-striped table-width100" id="tblSample">
+                    <thead>
+                    <tr>
+                        <th id="adminNo"      class="sort_header" th:text="#{'common.label.adminNo'}">관리자번호</th>
+                        <th id="adminID"      class="sort_header" th:text="#{'common.label.adminID'}">관리자 아이디</th>
+                        <th id="adminName"    class="sort_header" th:text="#{'common.label.adminName'}">관리자명</th>
+                        <th id="celNo"        class="sort_header" th:text="#{'common.label.phoneNumber'}">핸드폰번호</th>
+                        <th id="menuRoleName" class="sort_header" th:text="#{'administratorMgmt.accessAuth'}">접근 권힌</th>
+                        <th id="email"        class="sort_header" th:text="#{'common.label.email'}">이메일</th>
+                        <th id="useFlag"      class="sort_header" th:text="#{'common.label.availability'}">사용 여부</th>
+                        <th th:text="#{'common.label.work'}">작업</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detail -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">Detail</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="row form-row">
+                    <div class="col-md-12">
+                        <span class="text-red">&nbsp * '등록' / '수정' > 하나의 html 공유하며, 화면 내에서 구분 값(Mode)을 통해 제어</span>
+                    </div>
+                </div>
+                <div class="row form-row">
+                    <div class="col-md-12">
+                        <button type="button" id="btnGoRegistSample" class="btn btn-primary btn-sm" th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'">등록 페이지 진입</button>&nbsp;&nbsp;
+                        <button type="button" id="btnGoUpdateSample" class="btn btn-primary btn-sm" th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'">수정 페이지 진입</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab -->
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title">Tab</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#tab1" id="sampleTab1" data-toggle="tab">Tab 1</a></li>
+                    <li><a href="#tab2" id="sampleTab2" data-toggle="tab">Tab 2</a></li>
+                    <li><a href="#tab3" id="sampleTab3" data-toggle="tab">Tab 3</a></li>
+                </ul>
+
+                <form id="frmSearchTab" name="frmSearchTab">
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-12">
+                            <div class="col-md-3 no-padding">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="input-group">
+                                    <input type="hidden" id="hidTabFromYMD" name="strFromYMD" th:value="${#request.getAttribute('strFromYMD')}">
+                                    <input type="hidden" id="hidTabToYMD" name="strToYMD" th:value="${#request.getAttribute('strToYMD')}">
+                                    <input type="text" class="form-control pull-right" id="txtTabRangeYMD">
+                                    <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div><button type="button" id="btnSearchSampleInfo" class="btn btn-default btn-sm" th:text="#{'common.label.search'}">조회</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="tab-content modal-div-top">
+                    <!-- BEGIN TAB 1 VIEW AREA -->
+                    <div class="tab-pane active" id="tab1">
+                        <table class="table table-bordered table-striped table-width100" id="tblSample1">
+                            <thead>
+                            <tr>
+                                <th>캐시 번호</th>
+                                <th>결제 수단</th>
+                                <th>통화 코드</th>
+                                <th>결제 금액</th>
+                                <th>캐시 금액</th>
+                                <th>잔여 캐시 금액</th>
+                                <th>취소 여부</th>
+                                <th>결제 일시</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- END TAB 1 VIEW AREA -->
+
+                    <!-- BEGIN TAB 2 VIEW AREA -->
+                    <div class="tab-pane" id="tab2">
+                        <table class="table table-bordered table-striped table-width100" id="tblSample2">
+                            <thead>
+                            <tr>
+                                <th>아이템 명</th>
+                                <th>아이템 유형</th>
+                                <th>구매 금액</th>
+                                <th>취소 여부</th>
+                                <th>구매 일시</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- END TAB 2 VIEW AREA -->
+
+                    <!-- BEGIN TAB 3 VIEW AREA -->
+                    <div class="tab-pane" id="tab3">
+                        <table class="table table-bordered table-striped table-width100" id="tblSample3">
+                            <thead>
+                            <tr>
+                                <th>결제 수단 명</th>
+                                <th>PG 코드</th>
+                                <th>상점 아이디</th>
+                                <th>통화 코드</th>
+                                <th>결제 금액</th>
+                                <th>주문 번호</th>
+                                <th>거래 번호</th>
+                                <th>결제 일자</th>
+                                <th>결과 코드</th>
+                                <th>결과 메시지</th>
+                                <th>상태</th>
+                                <th>등록 일시</th>
+                                <th>수정 일시</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- END TAB 3 VIEW AREA -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+
+    <!-- BEGIN REGIST MODAL AREA -->
+    <div class="modal fade" id="divInsSampleModal" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block>샘플 등록</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmInsSample" name="frmInsSample">
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminID'}">관리자ID</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsAdminID" name="adminID" class="form-control" maxlength="20" th:placeholder="#{'common.label.holderID'}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminName'}">관리자명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsAdminName" name="adminName" class="form-control" maxlength="50" />
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.phoneNumber'}">핸드폰번호</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsCelNo" name="celNo" class="form-control" th:placeholder="#{'common.label.holderPhone'}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.email'}">이메일</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtInsEmail" name="email" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" checked />
+                                        <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                        <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="btnInsSample" th:text="#{'common.label.register'}">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END REGISTER MODAL AREA -->
+
+    <!-- BEGIN EDIT MODAL AREA -->
+    <div class="modal fade" id="divUpdSampleModal" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block>샘플 수정</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmUpdSample" name="frmUpdSample">
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminID'}">관리자 아이디</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdAdminID" name="adminID" class="form-control" disabled="disabled"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.adminName'}">관리자명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdAdminName" name="adminName" class="form-control" maxlength="50" />
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.phoneNumber'}">핸드폰번호</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdCelNo" name="celNo" class="form-control" maxlength="20" th:placeholder="#{'common.label.holderPhone'}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.email'}">이메일</span> <i class="fa fa-asterisk text-danger"></i></label>
+                                <input type="text" id="txtUpdEmail" name="email" class="form-control" maxlength="200"/>
+                            </div>
+                        </div>
+                        <div class="row form-row form-group-sm">
+                            <div class="col-md-6">
+                                <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                        <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                        <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="btnUpdSample" th:text="#{'common.label.update'}">수정</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END EDIT MODAL AREA -->
+
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _objSampleTable;
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_ADMINISTRATOR}]]*/ '/administrator/administrator';
+    var _strSampleMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_SAMPLE}]]*/ '/sample/sample';
+    var _strMode     = _strModeIns;
+
+    $(function() {
+        fnInitPage();
+        fnSetValidate();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 페이지 초기화
+     ------------------------------------------------------------*/
+    function fnInitPage() {
+        // 단일 (일반) DatePicker 초기 설정
+        COMMON.Utils.fnInitSingleDatePicker("#txtSelectYMD1");
+        // 단일 (날짜 제한) DatePicker 초기 설정
+        COMMON.Utils.fnInitSingleDatePicker("#txtSelectYMD2", "yyyy-mm-dd", { startDate: _todayDate });
+        // 단일 (년월만) DatePicker 초기 설정
+        COMMON.Utils.fnInitSingleDatePicker("#txtSelectYMD3", "yyyy-mm", { viewMode: "months", minViewMode: "months" });
+        // 기간 DatePicker 초기 설정
+        COMMON.Utils.fnInitSearchDateRangePicker("#frmSearchSample", "#hidFromYMD", "#hidToYMD", "#txtRangeYMD");
+        // TAB DatePicker 초기 설정
+        COMMON.Utils.fnInitSearchDateRangePicker("#frmSearchTab", "#hidTabFromYMD", "#hidTabToYMD", "#txtTabRangeYMD");
+    }
+
+    /**------------------------------------------------------------
+    * Form 유효성
+    ------------------------------------------------------------*/
+    function fnSetValidate() {
+        var strInsFormID = "frm{0}Sample".format(_strModeIns);
+        var strUpdFormID = "frm{0}Sample".format(_strModeUpd);
+
+        var objInsValidate = {
+            FORMID  : strInsFormID,
+            VARIABLE: {
+                adminID   : { required: true, maxlength: 20, minlength: 4, alphaNumeric: true },
+                adminName : { required: true, maxlength: 50 },
+                celNo     : { required: true, celNo: true },
+                email     : { required: true, email: true }
+            }
+        };
+        COMMON.Utils.fnSetValidate(objInsValidate);
+
+        var objUpdValidate = {
+            FORMID  : strUpdFormID,
+            VARIABLE: {
+                adminID   : { required: true, maxlength: 20, minlength: 4, alphaNumeric: true },
+                adminName : { required: true, maxlength: 50 },
+                celNo     : { required: true, celNo: true },
+                email     : { required: true, email: true }
+            }
+        };
+        COMMON.Utils.fnSetValidate(objUpdValidate);
+    };
+
+    /**------------------------------------------------------------
+    * 이벤트 초기화
+    ------------------------------------------------------------*/
+    function fnInitEvent() {
+        // List, Modal, Validation > Enter 이벤트
+        COMMON.Utils.fnEnterEvent($("#frmSearchSample"), "fnSearchSample");
+
+        // List, Modal, Validation > '조회' 버튼 이벤트
+        $("#btnSearchSample").on("click", fnSearchSample);
+
+        // List, Modal, Validation > '등록' 버튼 이벤트
+        $("#btnShowRegistSample").on("click", fnInsertSetting);
+
+        // List, Modal, Validation > '수정' 버튼 이벤트
+        $("#tblSample").on("click", "button[id='btnShowUpdateSample']", fnUpdateSetting);
+
+        // List, Modal, Validation > 정렬 이벤트
+        $(".sort_header").on("click", function() {
+            COMMON.Utils.fnSortSettings(this, $("#frmSearchSample"));
+        });
+
+        // List, Modal, Validation > '엑셀' 버튼 이벤트
+        $("#btnExcel").on("click", function() {
+            var strConfirmMsg = /*[[#{'common.msg.confirmDownExcel'}]]*/ '엑셀을 다운로드 하시겠습니까?';
+            COMMON.Msg.fnConfirm(strConfirmMsg, function() {
+                var strExcelPath = _strMenuPath + "/excelDownload";
+                COMMON.Utils.fnFileDownload("GET", $("#frmSearchSample").serializeObject(), strExcelPath);
+            });
+        });
+
+        // List, Modal, Validation > 모달 내 '등록', '수정' 버튼 이벤트
+        $("#btnInsSample, #btnUpdSample").on("click", fnEditSample);
+
+        // Detail > '등록 페이지 진입' 버튼 이벤트
+        $("#btnGoRegistSample").on("click", function() {
+            fnGoEditSample(_strModeIns, null);
+        });
+
+        // Detail > '수정 페이지 진입' 버튼 이벤트
+        $("#btnGoUpdateSample").on("click", function() {
+            fnGoEditSample(_strModeUpd, 1); // Sample... menuNo = 1 값 설정
+        });
+    };
+
+    /**------------------------------------------------------------
+    * 샘플 리스트 조회
+    ------------------------------------------------------------*/
+    function fnSearchSample() {
+        if(typeof _objSampleTable == "undefined") {
+            _objSampleTable = COMMON.Ajax.CreateDataTable("#tblSample", true, {
+                url: _strMenuPath + '/selectAdministratorList',
+                data: function() {
+                    return $("#frmSearchSample").serializeObject();
+                },
+                columns: [
+                    { "data": "adminNo",      "class": "td-center" },
+                    { "data": null,           "class": "td-center", "render": fnRenderAdminID },
+                    { "data": "adminName",    "class": "td-center" },
+                    { "data": "celNo",        "class": "td-center" },
+                    { "data": "menuRoleName", "class": "td-center" },
+                    { "data": "email",        "class": "td-center" },
+                    { "data": "useFlag",      "class": "td-center", "render": COMMON.Utils.fnRenderFlag },
+                    { "data": null,           "class": "td-center", "render": fnRenderWork, "orderable": false }
+                ],
+                columnDefs: [
+                    {
+                        "targets": [7],
+                        "visible": COMMON.Auth.fnCheckHasAuth(/*[[${#request.getAttribute('authCode')}]]*/'', AUTHCODE.ALL)
+                    }
+                ],
+                order: [ 0, "desc" ],
+                fnDrawCallback: function() {
+                    fnInitExpand();
+                }
+            });
+        } else {
+            _objSampleTable.clearPipeline();
+            _objSampleTable.ajax.reload();
+        }
+
+        $("#div_searchResult").show();
+    }
+
+    /**------------------------------------------------------------
+     * 리스트 'AdminID' Render
+     ------------------------------------------------------------*/
+    function fnRenderAdminID(data) {
+        return "<a class='link' href='javascript:' onclick='fnGoDetailSample(\"{0}\")'>{1}</a>".format(data.adminID, data.adminID);
+    }
+
+    /**------------------------------------------------------------
+    * 리스트 작업 Render
+    ------------------------------------------------------------*/
+    function fnRenderWork(data) {
+        return "<button id='btnShowUpdateSample' title='update' type='button' class='btn btn-primary btn-xs auth-all' data-adminno='{0}'><i class='fa fa-edit'></i></button>".format(data.adminNo);
+    }
+
+    /**------------------------------------------------------------
+     * 상세 화면 진입
+     ------------------------------------------------------------*/
+    function fnGoDetailSample() {
+        location.href = _strSampleMenuPath + "/sampleDetail";
+    }
+
+    /**------------------------------------------------------------
+     * 등록 폼 설정
+     ------------------------------------------------------------*/
+    function fnInsertSetting() {
+        _strMode  = _strModeIns;
+
+        COMMON.Utils.fnFrmReset("frmInsSample");
+
+        $("#divInsSampleModal").modal("show");
+    }
+
+    /**------------------------------------------------------------
+     * 수정 폼 설정
+     ------------------------------------------------------------*/
+    function fnUpdateSetting() {
+        _strMode = _strModeUpd;
+
+        COMMON.Utils.fnFrmReset("frmUpdSample");
+
+        var obj = {
+            requestData : {
+                adminNo : $(this).attr("data-adminno"),
+                length  : 1
+            },
+            strCallUrl  : _strMenuPath + '/selectAdministratorList',
+            strCallBack : function(objJson) {
+                if(objJson.intRetCode !== 0) {
+                    COMMON.Msg.fnAlert(objJson.strRetMsg);
+
+                    $("#divUpdSampleModal").modal("hide");
+                } else {
+                    var admin = objJson.data[0];
+
+                    // input 항목 값 자동 Mapping
+                    COMMON.Utils.fnFrmSettings("frmUpdSample", admin);
+
+                    $("#frmUpdSample [id='selUpdMenuRoleNo']").select2("val", admin.menuRoleNo);
+                    // $("#frmUpdSample [name='useFlag'][value='" + admin.useFlag + "']").attr("checked", "checked");
+                    $("#frmUpdSample [name='useFlag'][value='{0}']".format(admin.useFlag)).prop("checked", true);
+
+                    $("#divUpdSampleModal").modal("show");
+                }
+            },
+            isModalMsg : false
+        };
+
+        COMMON.Ajax.fnRequest(obj);
+    }
+
+    function fnInitExpand() {
+        // List, Modal, Validation > 확장 '▼' 버튼 이벤트
+        $("#tblSample tbody tr").on("click", function() {
+            var tr = $(this);
+            var row = _objSampleTable.row(tr);
+
+            if(row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass("shown");
+            } else {
+                row.child(fnAddInfo("#tblSample", row.data())).show();
+                tr.addClass("shown");
+            }
+        });
+    }
+
+    /**------------------------------------------------------------
+     * 확장 영역
+     ------------------------------------------------------------*/
+    function fnAddInfo() {
+        var html = "";
+
+        html += "<table class='table' style='width:100%; border: 1px solid rgb(221, 221, 221);'>";
+        html += "<colgroup>";
+        html += "<col width='5%'>";
+        html += "<col width='5%'>";
+        html += "<col width='5%'>";
+        html += "<col width='5%'>";
+        html += "<col width='5%'>";
+        html += "<col width='10%'>";
+        html += "<col width='8%'>";
+        html += "<col width='10%'>";
+        html += "<col width='5%'>";
+        html += "<col width='8%'>";
+        html += "<col width='20%'>";
+        html += "<col width='5%'>";
+        html += "<col width='15%'>";
+        html += "</colgroup>";
+
+        // 데이터 영역
+        var lngOrderNo = 1;
+        html += "<tr id='tr_" + lngOrderNo + "'>";
+        html += "<td class='center-text' data-column='dblProductAmt'>1</td>";
+        html += "<td class='center-text' data-column='dblDCAmt'>2</td>";
+        html += "<td class='center-text' data-column='dblCouponDCAmt'></td>";
+        html += "<td class='center-text' data-column='intOrderCnt'></td>";
+        html += "<td class='center-text' data-column='dblShipAmt'></td>";
+        html += "<td class='center-text' data-column='strMemberName'></td>";
+        html += "<td class='center-text' data-column='strCelNo'></td>";
+        html += "<td class='center-text' data-column='strEmail'></td>";
+        html += "<td class='center-text' data-column='strRcvName'></td>";
+        html += "<td class='center-text' data-column='strRcvCelNo'></td>";
+        html += "<td class='center-text' data-column='strRcvAddr'></td>";
+        html += "<td class='center-text' data-column='strRcvZipCode'></td>";
+        html += "<td class='center-text' data-column='strShipMsg'></td>";
+        html += "</tr>";
+        html += "</table>";
+
+        return html;
+    }
+
+    /**------------------------------------------------------------
+     * Modal > '등록' / '수정'
+     ------------------------------------------------------------*/
+    function fnEditSample() {
+        if(!$("#frm{0}Sample".format(_strMode)).valid()) {
+            return;
+        }
+
+        var strInsConfirmMsg     = /*[[#{'common.msg.confirmIns'}]]*/ '등록하시겠습니까?';
+        var strUpdConfirmMsg     = /*[[#{'common.msg.confirmUpd'}]]*/ '수정하시겠습니까?';
+        var strConfirmMsg        = _strMode === _strModeIns ? strInsConfirmMsg : strUpdConfirmMsg;
+
+        COMMON.Msg.fnConfirmWithModal(strConfirmMsg, "div{0}SampleModal".format(_strMode), true, function() {
+            // 등록, 수정 로직 구현부
+        });
+
+        $("#div{0}SampleModal".format(_strMode)).modal("hide");
+    }
+
+    /**------------------------------------------------------------
+     * 편집 화면 진입
+     ------------------------------------------------------------*/
+    function fnGoEditSample(strMode, object) {
+        var loc = _strSampleMenuPath + "/sampleEdit?editMode={0}".format(strMode);
+        if(strMode == _strModeUpd) {
+            loc += "&menuNo={0}".format(object);
+        }
+        location.href = loc;
+    }
+
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

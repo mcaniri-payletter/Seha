@@ -1,0 +1,419 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 메뉴그룹 View
+# Date   : 2020.01.16
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewResults'}">조회 결과</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-striped table-width100" id="tbMenuGroup">
+                    <thead>
+                        <tr>
+                            <th th:text="#{'common.label.order'}">순서</th>
+                            <th th:text="#{'common.label.no'}">No</th>
+                            <th th:text="#{'menuGroupMgmt.menuGroupName'}">메뉴 그룹 명</th>
+                            <th th:text="#{'menuGroupMgmt.menuGroupNameCode'}">메뉴 그룹 명 코드</th>
+                            <th th:text="#{'menuGroupMgmt.icon'}">아이콘</th>
+                            <th th:text="#{'menuGroupMgmt.iconTag'}">아이콘 태그</th>
+                            <th th:text="#{'common.label.availability'}">사용 여부</th>
+                            <th th:text="#{'common.label.adminID'}">관리자 아이디</th>
+                            <th th:text="#{'common.label.regDate'}">등록 일시</th>
+                            <th th:text="#{'common.label.updDate'}">수정 일시</th>
+                            <th th:text="#{'common.label.work'}">작업</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'" class="panel panel-default auth-all">
+                    <div class="panel-heading">
+                        <button id="btnAddMenuGroup" title='Insert' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#divInsMenuGroupModal'><i class='fa fa-plus'></i></button> &nbsp;
+                        <button id="btnEditMenuGroup" title='Save' type='button' class='btn btn-danger btn-sm'><i class='fa fa-save'></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+
+    <!-- BEGIN INSERT MODAL AREA -->
+    <div class="modal fade" id="divInsMenuGroupModal" data-backdrop="static">
+        <div class="modal-dialog modal-xs">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block th:text="#{'menuGroupMgmt.insMenuGroup'}">메뉴 그룹 등록</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmInsMenuGroup" name="frmInsMenuGroup">
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuGroupMgmt.menuGroupNameCode'}">메뉴 그룹 명 코드</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtInsMenuGroupName" name="menuGroupName" class="form-control" />
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuGroupMgmt.iconTag'}">아이콘 태그</span></label>
+                            <input type="text" id="txtInsMenuGroupIcon" name="menuGroupIcon" class="form-control"/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" checked />
+                                    <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                    <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                        <button type="button" class="btn btn-danger btn-sm auth-all" id="btnInsSaveMenuGroup" th:text="#{'common.label.register'}">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END INSERT MODAL AREA -->
+
+    <!-- BEGIN UPDATE MODAL AREA -->
+    <div class="modal fade" id="divUpdMenuGroupModal" data-backdrop="static">
+        <div class="modal-dialog modal-xs">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block th:text="#{'menuGroupMgmt.updMenuGroup'}">메뉴 그룹 수정</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmUpdMenuGroup" name="frmUpdMenuGroup">
+                        <input type="hidden" id="hidUpdMenuGroupNo" class="form-control"/>
+                        <input type="hidden" id="hidUpdSortNo" class="form-control"/>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuGroupMgmt.menuGroupNameCode'}">메뉴 그룹 명 코드</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtUpdMenuGroupName" name="menuGroupName" class="form-control" disabled/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuGroupMgmt.iconTag'}">아이콘 태그</span></label>
+                            <input type="text" id="txtUpdMenuGroupIcon" name="menuGroupIcon" class="form-control" disabled/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                    <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                    <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                        <button type="button" class="btn btn-danger btn-sm auth-all" id="btnUpdSaveMenuGroup" th:text="#{'common.label.update'}">수정</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END UPDATE MODAL AREA -->
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _objMenuGroupTable;
+    var _strMenuPath   = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_MENU_GROUP}]]*/ '/menuAuthority/menuGroup';
+    var _strMode       = _strModeIns;
+
+    $(function() {
+        fnSetValidate();
+        fnInitEvent();
+        fnSearchMenuGroup();
+    });
+
+    /**------------------------------------------------------------
+    * Form Validate
+    ------------------------------------------------------------*/
+    var fnSetValidate = function() {
+        var strInsFormID = "frm{0}MenuGroup".format(_strModeIns);
+        var strUpdFormID = "frm{0}MenuGroup".format(_strModeUpd);
+
+        var objInsValidate = {
+            FORMID  : strInsFormID,
+            VARIABLE: {
+                menuGroupName: { required: true, maxlength: 50 },
+                menuGroupIcon: { maxlength: 512 }
+            }
+        };
+        COMMON.Utils.fnSetValidate(objInsValidate);
+
+        var objUpdValidate = {
+            FORMID  : strUpdFormID,
+            VARIABLE: {
+                menuGroupName: { required: true, maxlength: 50 },
+                menuGroupIcon: { maxlength: 512 }
+            }
+        };
+        COMMON.Utils.fnSetValidate(objUpdValidate);
+    };
+
+    /**------------------------------------------------------------
+    * Event
+    ------------------------------------------------------------*/
+    var fnInitEvent = function() {
+        $("#tbMenuGroup").on("click", ".sortUp", fnClickSortNoUp);
+        $("#tbMenuGroup").on("click", ".sortDown", fnClickSortNoDown);
+        $("#btnAddMenuGroup").on("click", fnClickRegistMenu);
+        $("#tbMenuGroup").on("click", ".btnUpdMenuGroup", fnClickUpdMenuGroup);
+        $("#btnInsSaveMenuGroup, #btnUpdSaveMenuGroup").on("click", fnClickSaveMenuGroup);
+        $("#btnEditMenuGroup").on("click", fnClickEditMenuGroup);
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 조회
+    ------------------------------------------------------------*/
+    function fnSearchMenuGroup() {
+        if(typeof _objMenuGroupTable == "undefined") {
+            _objMenuGroupTable = COMMON.Ajax.CreateDataTable("#tbMenuGroup", true, {
+                url: _strMenuPath + '/selectMenuGroupList',
+                data: function() {
+                    return;
+                },
+                columns: [
+                    { "data":  null,                "class": "td-center", "render": fnRenderMenuSort },
+                    { "data": "menuGroupNo",        "class": "td-center" },
+                    { "data": "menuGroupNameTrans", "class": "td-center" },
+                    { "data": "menuGroupName",      "class": "td-center" },
+                    { "data":  null,                "class": "td-center", "render": fnRenderIcon },
+                    { "data": "menuGroupIcon",      "class": "td-center" },
+                    { "data": "useFlag",            "class": "td-center", "render": COMMON.Utils.fnRenderFlag },
+                    { "data": "adminID",            "class": "td-center" },
+                    { "data": "regDate",            "class": "td-center" },
+                    { "data": "updDate",            "class": "td-center" },
+                    { "data":  null,                "class": "td-center", "render": fnRenderWork }
+                ],
+                columnDefs: [
+                    {
+                        "targets": [0, 9],
+                        "visible": COMMON.Auth.fnCheckHasAuth(/*[[${#request.getAttribute('authCode')}]]*/'', AUTHCODE.ALL)
+                    }
+                ],
+                ordering: false,
+                dom: "rt",
+                pageLength: 100
+            });
+        } else {
+            _objMenuGroupTable.clearPipeline();
+            _objMenuGroupTable.ajax.reload();
+        }
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 리스트 정렬 Render
+    ------------------------------------------------------------*/
+    var fnRenderMenuSort = function() {
+        var strHtml = "";
+
+        strHtml += "<a href='javascript:;' class='sortUp'>";
+        strHtml += "<i class='fa fa-arrow-up' style=''></i>";
+        strHtml += "</a>";
+
+        strHtml += "&nbsp;&nbsp;&nbsp;<a href='javascript:;' class='sortDown'>";
+        strHtml += "<i class='fa fa-arrow-down' style=''></i>";
+        strHtml += "</a>";
+
+        return strHtml;
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 아이콘 Render
+    ------------------------------------------------------------*/
+    var fnRenderIcon = function(data) {
+        return "<button title='" + data.menuGroupName + "' type='button' class='btn btn-default btn-xs'><i class='" + data.menuGroupIcon + "'></i></button>";
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 리스트 수정 Render
+    ------------------------------------------------------------*/
+    var fnRenderWork = function(data) {
+        return "<button type='button' data-menugroupno='" + data.menuGroupNo + "' data-menugroupsort='" + data.sortNo + "' class='btn btn-primary btn-xs auth-all btnUpdMenuGroup'><i class='fa fa-edit'></i></button>";
+    };
+
+    /**------------------------------------------------------------
+    * 리스트 순서 변경 이벤트(UP)
+    ------------------------------------------------------------*/
+    var fnClickSortNoUp = function(event) {
+        var $tr = $(event.currentTarget).closest("tr");
+        $tr.prev().before($tr);
+    };
+
+    /**------------------------------------------------------------
+    * 리스트 순서 변경 이벤트(DOWN)
+    ------------------------------------------------------------*/
+    var fnClickSortNoDown = function(event) {
+        var $tr = $(event.currentTarget).closest("tr");
+        $tr.next().after($tr);
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 리스트 저장 이벤트
+    ------------------------------------------------------------*/
+    var fnClickEditMenuGroup = function() {
+        var strConfirmMsg = /*[[#{'menuGroupMgmt.msgUpdate'}]]*/ '메뉴 그룹을 수정하시겠습니까?';
+        var strSuccessMsg = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+        var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+
+        COMMON.Msg.fnConfirm(strConfirmMsg, function() {
+            var arrMenuGroupList = [];
+            var sortNo           = 1;
+
+            $("#tbMenuGroup").find("tbody tr").each(function() {
+                var useFlag      = $(this).find("td:eq(6)").text() === 'Y' ? true : false;
+                var objMenuGroup = {};
+                var adminNo      = /*[[${#request.getAttribute('adminNo')}]]*/ '0'; //관리자 번호
+
+                objMenuGroup["menuGroupNo"]   = $(this).find("td:eq(1)").text();
+                objMenuGroup["menuGroupName"] = $(this).find("td:eq(3)").text();
+                objMenuGroup["menuGroupIcon"] = $(this).find("td:eq(5)").text();
+                objMenuGroup["sortNo"]        = sortNo++;
+                objMenuGroup["adminNo"]       = adminNo;
+                objMenuGroup["useFlag"]       = useFlag;
+
+                arrMenuGroupList.push(objMenuGroup);
+            });
+
+            var obj = {
+                requestData: {
+                    menuGroupList : arrMenuGroupList
+                },
+                strCallUrl    : _strMenuPath + "/updateMenuGroupList",
+                strCallBack   : "fnSearchMenuGroup",
+                isModalMsg    : true,
+                strSuccessMsg : strSuccessMsg,
+                strErrorMsg   : strErrorMsg
+            };
+
+            COMMON.Ajax.fnRequest(obj);
+        });
+    };
+
+    /**------------------------------------------------------------
+    * 하위 메뉴 등록 모달 노출 이벤트
+    ------------------------------------------------------------*/
+    var fnClickRegistMenu = function() {
+        _strMode = _strModeIns;
+
+        COMMON.Utils.fnFrmReset("frmInsMenuGroup");
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 등록, 수정 이벤트
+    ------------------------------------------------------------*/
+    var fnClickSaveMenuGroup = function() {
+        if(!$("#frm{0}MenuGroup".format(_strMode)).valid()) {
+            return;
+        }
+
+        var strInsConfirmMsg = /*[[#{'common.msg.confirmIns'}]]*/ '등록하시겠습니까?';
+        var strUpdConfirmMsg = /*[[#{'common.msg.confirmUpd'}]]*/ '수정하시겠습니까?';
+        var strConfirmMsg    = _strMode === _strModeIns ? strInsConfirmMsg : strUpdConfirmMsg;
+
+        COMMON.Msg.fnConfirmWithModal(strConfirmMsg, "div{0}MenuGroupModal".format(_strMode), true, function() {
+            var strSuccessMsg = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+            var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+            var adminNo       = /*[[${#request.getAttribute('adminNo')}]]*/ '0'; //관리자 번호
+
+
+            var menuGroupIcon = $("#txt{0}MenuGroupIcon".format(_strMode)).val().trim();
+            menuGroupIcon = COMMON.Utils.fnIsEmpty(menuGroupIcon) ? 'fa fa-square' : menuGroupIcon;
+
+            var obj = {
+                requestData   : {
+                    menuGroupNo   : _strMode === _strModeUpd ? $("#hidUpdMenuGroupNo").val() : null,
+                    menuGroupName : $("#txt{0}MenuGroupName".format(_strMode)).val().trim(),
+                    menuGroupIcon : menuGroupIcon,
+                    sortNo        : _strMode === _strModeUpd ? $("#hidUpdSortNo").val() : null,
+                    adminNo       : adminNo,
+                    useFlag       : $("#frm{0}MenuGroup".format(_strMode)).find("input[name='useFlag']:checked").val()
+                },
+                strCallUrl    : _strMenuPath + "/mergeMenuGroupList",
+                strCallBack   : "fnSearchMenuGroup",
+                isModalMsg    : true,
+                strSuccessMsg : strSuccessMsg,
+                strErrorMsg   : strErrorMsg
+            };
+
+            COMMON.Ajax.fnRequest(obj);
+        });
+
+        $("#div{0}MenuroupModal".format(_strMode)).modal("hide");
+    };
+
+    /**------------------------------------------------------------
+     * 메뉴 그룹 리스트 수정 폼 세팅
+     ------------------------------------------------------------*/
+    function fnClickUpdMenuGroup() {
+        _strMode = _strModeUpd;
+
+        COMMON.Utils.fnFrmReset("frmUpdMenuGroup");
+
+        var obj = {
+            requestData : {
+                menuGroupNo : $(this).attr("data-menugroupno"),
+                length      : 1
+            },
+            strCallUrl  : _strMenuPath + '/selectMenuGroupList',
+            strCallBack : function(objJson) {
+                if(objJson.intRetCode !== 0) {
+                    COMMON.Msg.fnAlert(objJson.strRetMsg);
+
+                    $("#divUpdMenuGroupModal").modal("hide");
+                } else {
+                    var menuGroupList = objJson.data[0];
+
+                    $("#frmUpdMenuGroup [id='hidUpdMenuGroupNo']").val(menuGroupList.menuGroupNo);
+                    $("#frmUpdMenuGroup [id='hidUpdSortNo']").val(menuGroupList.sortNo);
+                    $("#frmUpdMenuGroup [id='txtUpdMenuGroupName']").val(menuGroupList.menuGroupName);
+                    $("#frmUpdMenuGroup [id='txtUpdMenuGroupIcon']").val(menuGroupList.menuGroupIcon);
+                    $("#frmUpdMenuGroup [name='useFlag'][value='{0}']".format(menuGroupList.useFlag)).prop("checked", true);
+
+                    $("#divUpdMenuGroupModal").modal("show");
+                }
+            },
+            isModalMsg : false
+        };
+
+        COMMON.Ajax.fnRequest(obj);
+    }
+
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

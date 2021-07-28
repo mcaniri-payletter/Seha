@@ -1,0 +1,36 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 기본 좌측(메뉴) 영역
+# Date   : 2018.09.28
+#------------------------------------------------------------------------>
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <!-- BEGIN SIDEBAR -->
+    <aside th:fragment="leftMenuFragment" class="main-sidebar" id="main-menu">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+            <!-- Sidebar Menu -->
+            <ul class="sidebar-menu" data-widget="tree">
+                <li th:class="${#request.getAttribute('menuGroupNo') == adminMenu.value.menuGroupNo} ? 'active treeview menu-open' : 'treeview'" th:each="adminMenu : ${#request.getAttribute('menuList')}">
+                    <a href="javascript:;">
+                        <i th:class="${adminMenu.value.menuGroupIcon}"></i>
+                        <span th:text="${#messages.msg(adminMenu.value.menuGroupName)}"></span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li th:class="${#request.getAttribute('menuNo') == subMenu.value.menuNo} ? 'active' : ''" th:each="subMenu : ${adminMenu.value.subMenu}">
+                            <a th:href="${subMenu.value.menuLink}">
+                                <i class="fa fa-check"></i>
+                                <th:block th:text="${#messages.msg(subMenu.value.menuGroupName)}"></th:block>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- /.sidebar-menu -->
+        </section>
+        <!-- /.sidebar -->
+    </aside>
+</html>

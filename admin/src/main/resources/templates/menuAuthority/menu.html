@@ -1,0 +1,484 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 메뉴 View
+# Date   : 2020.01.21
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewCriteria'}">조회 조건</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <form id="frmSearchMenu">
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <select name="menuGroupNo" id="selMenuGroupNo" class="select2 form-control">
+                                <option value="" selected th:text="#{'common.label.select'}">선택</option>
+                                <option th:each="menuGroup : ${menuGroupList}" th:value="${menuGroup.codeID}" th:text="${menuGroup.codeName}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewResults'}">조회 결과</h3>
+            </div>
+            <div class="box-body" id="div_searchResult" style="display: none;">
+                <table class="table table-bordered table-striped table-width100" id="tbMenu">
+                    <thead>
+                        <tr>
+                            <th th:text="#{'common.label.order'}">순서</th>
+                            <th th:text="#{'common.label.no'}">No</th>
+                            <th th:text="#{'common.label.menuName'}">메뉴 명</th>
+                            <th th:text="#{'menuMgmt.menuNameCode'}">메뉴 명 코드</th>
+                            <th th:text="#{'common.label.menuLink'}">메뉴 링크</th>
+                            <th th:text="#{'common.label.status'}">상태</th>
+                            <th th:text="#{'common.label.adminID'}">관리자 아이디</th>
+                            <th th:text="#{'common.label.regDate'}">등록 일시</th>
+                            <th th:text="#{'common.label.updDate'}">수정 일시</th>
+                            <th th:text="#{'common.label.work'}">작업</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'" class="panel panel-default auth-all">
+                    <div class="panel-heading">
+                        <button id="btnInsMenu" title='Insert' type='button' class='btn btn-primary btn-sm' data-toggle='modal' data-target='#divInsMenuModal'><i class='fa fa-plus'></i></button> &nbsp;
+                        <button id="btnEditMenuList" title='Save' type='button' class='btn btn-danger btn-sm'><i class='fa fa-save'></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+
+    <!-- BEGIN INSERT MODAL AREA -->
+    <div class="modal fade" id="divInsMenuModal" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block th:text="#{'menuMgmt.insMenu'}">메뉴 등록</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmInsMenu" name="frmInsMenu">
+                        <input type="hidden" id="hidInsMenuNo" name="menuNo" />
+                        <input type="hidden" id="hidInsMenuGroupNo" name="menuGroupNo" />
+                        <div class="form-row form-group-sm">
+                            <label class="form-label" th:text="#{'menuMgmt.menuGroupName'}">메뉴 그룹 명</label>
+                            <input type="text" id="txtInsMenuGroupName" name="menuGroupName" class="form-control" disabled="disabled">
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuNameCode'}">메뉴 명 코드</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtInsMenuName" data-toggle="tooltip" name="menuName" class="form-control" maxlength="50"/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'common.label.menuLink'}">메뉴 Link</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtInsMenuLink" name="menuLink" class="form-control" maxlength="100"/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuURISegment'}">메뉴 URI Segment</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtInsMenuDivSgmnt" name="menuDivSgmnt" class="form-control" maxlength="100" required/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuDesc'}">메뉴 설명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <textarea id="txtInsMenuDesc" name="menuDesc" cols="88" rows="3" class="form-control" required></textarea>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" checked />
+                                    <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                    <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="btnInsSaveMenuModal" th:text="#{'common.label.register'}">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END INSERT MODAL AREA -->
+
+    <!-- BEGIN UPDATE MODAL AREA -->
+    <div class="modal fade" id="divUpdMenuModal" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">
+                        <i class="fa fa-pencil">&nbsp;</i>
+                        <th:block th:text="#{'menuMgmt.updMenu'}">메뉴 수정</th:block>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="frmUpdMenu" name="frmUpdMenu">
+                        <input type="hidden" id="hidUpdMenuNo" name="menuNo" />
+                        <input type="hidden" id="hidUpdMenuGroupNo" name="menuGroupNo" />
+                        <input type="hidden" id="hidUpdSortNo" name="menuGroupNo" />
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuGroupName'}">메뉴 그룹 명</span></label>
+                            <input type="text" id="txtUpdMenuGroupName" name="menuGroupName" class="form-control" disabled="disabled"/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuNameCode'}">메뉴 명 코드</span></label>
+                            <input type="text" id="txtUpdMenuName" data-toggle="tooltip" name="menuName" class="form-control" disabled="disabled"/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'common.label.menuLink'}">메뉴 Link</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtUpdMenuLink" name="menuLink" class="form-control" maxlength="100"/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuURISegment'}">메뉴 URI Segment</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtUpdMenuDivSgmnt" name="menuDivSgmnt" class="form-control" maxlength="100" required/>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'menuMgmt.menuDesc'}">메뉴 설명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <textarea id="txtUpdMenuDesc" name="menuDesc" cols="88" rows="3" class="form-control" required></textarea>
+                        </div>
+                        <div class="form-row form-group-sm">
+                            <label class="form-label"><span th:text="#{'common.label.availability'}">사용 여부</span></label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" />
+                                    <span th:text="#{'common.label.useFlag.y'}">사용</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="useFlag" th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" />
+                                    <span th:text="#{'common.label.useFlag.n'}">미사용</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="btnUpdSaveMenuModal" th:text="#{'common.label.update'}">수정</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END EDIT MODAL AREA -->
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _objMenuTable;
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_MENU}]]*/ '/menuAuthority/menu';
+
+    $(function() {
+        fnSetValidate();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+    * Form Validate
+    ------------------------------------------------------------*/
+    var fnSetValidate = function() {
+        var strInsFormID = "frm{0}Menu".format(_strModeIns);
+        var strUpdFormID = "frm{0}Menu".format(_strModeUpd);
+
+        var objInsValidate = {
+            FORMID  : strInsFormID,
+            VARIABLE: {
+                menuName      : { required: true, maxlength: 50 },
+                menuLink      : { required: true, maxlength: 100 },
+                menuDivSgmnt  : { required: true, maxlength: 256 },
+                txtInsMenuDesc: { required: true, maxlength: 256 }
+            }
+        };
+        COMMON.Utils.fnSetValidate(objInsValidate);
+
+        var objUpdValidate = {
+            FORMID  : strUpdFormID,
+            VARIABLE: {
+                menuName      : { required: true, maxlength: 50 },
+                menuLink      : { required: true, maxlength: 100 },
+                menuDivSgmnt  : { required: true, maxlength: 256 },
+                txtInsMenuDesc: { required: true, maxlength: 256 }
+            }
+        };
+        COMMON.Utils.fnSetValidate(objUpdValidate);
+    };
+
+    /**------------------------------------------------------------
+    * Event
+    ------------------------------------------------------------*/
+    var fnInitEvent = function() {
+        $("#tbMenu").on("click", ".sortUp", fnClickSortNoUp);
+        $("#tbMenu").on("click", ".sortDown", fnClickSortNoDown);
+        $("#tbMenu").on("click", ".btnUpdMenu", fnClickEditWork);
+        $("#selMenuGroupNo").on("change", fnChangeMenuGroup);
+        $("#btnInsMenu").on("click", fnClickRegistMenu);
+        $("#btnInsSaveMenuModal, #btnUpdSaveMenuModal").on("click", fnClickSaveMenuModal);
+        $("#btnEditMenuList").on("click", fnClickEditMenuList);
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 리스트 조회
+    ------------------------------------------------------------*/
+    function fnSearchMenu() {
+        if(typeof _objMenuTable == "undefined") {
+            _objMenuTable = COMMON.Ajax.CreateDataTable("#tbMenu", false, {
+                url: _strMenuPath + '/selectMenuList',
+                data: function() {
+                    return $("#frmSearchMenu").serializeObject();
+                },
+                columns: [
+                    { "data": null,            "class": "td-center", "render": fnRenderSortNo },
+                    { "data": "menuNo",        "class": "td-center" },
+                    { "data": "menuNameTrans", "class": "td-center" },
+                    { "data": "menuName",      "class": "td-center" },
+                    { "data": "menuLink",      "class": "td-center" },
+                    { "data": "useFlag",       "class": "td-center", "render": COMMON.Utils.fnRenderFlag },
+                    { "data": "adminID",       "class": "td-center" },
+                    { "data": "regDate",       "class": "td-center" },
+                    { "data": "updDate",       "class": "td-center" },
+                    { "data": null,            "class": "td-center", "render": fnRenderWork }
+                ],
+                columnDefs: [
+                    {
+                        "targets": [9],
+                        "visible": COMMON.Auth.fnCheckHasAuth(_authCode, AUTHCODE.ALL)
+                    }
+                ],
+                ordering: false,
+                paging: false,
+                dom: "rt"
+            });
+        } else {
+            _objMenuTable.clearPipeline();
+            _objMenuTable.ajax.reload();
+        }
+
+        $("#div_searchResult").show();
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 리스트 정렬 Render
+    ------------------------------------------------------------*/
+    var fnRenderSortNo = function() {
+        var strHtml = "";
+
+        strHtml += "<a href='javascript:;' class='sortUp'>";
+        strHtml += "<i class='fa fa-angle-up fa-2x' style=''></i>";
+        strHtml += "</a>";
+
+        strHtml += "&nbsp;&nbsp;&nbsp;<a href='javascript:;' class='sortDown'>";
+        strHtml += "<i class='fa fa-angle-down fa-2x' style=''></i>";
+        strHtml += "</a>";
+
+        return strHtml;
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 리스트 작업 Render
+    ------------------------------------------------------------*/
+    var fnRenderWork = function(data) {
+        return "<button type='button' title='Edit' data-toggle='modal' data-target='#divUpdMenuModal' data-menuno='" + data.menuNo + "' class='btn btn-primary btn-xs auth-all btnUpdMenu'><i class='fa fa-pencil'></i></button>";
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 그룹 조회 조건 변경 이벤트
+    ------------------------------------------------------------*/
+    var fnChangeMenuGroup = function() {
+        var menuGroupNo = $("#selMenuGroupNo").find("option:selected").val();
+        if(menuGroupNo === "") {
+            $("#hidInsMenuGroupNo").val("");
+            $("#div_searchResult").hide();
+        } else {
+            $("#hidInsMenuGroupNo").val(menuGroupNo);
+            $("#div_searchResult").show();
+            fnSearchMenu();
+        }
+    };
+
+    /**------------------------------------------------------------
+    * 리스트 순서 변경 이벤트(UP)
+    ------------------------------------------------------------*/
+    var fnClickSortNoUp = function(event) {
+        var $tr = $(event.currentTarget).closest("tr");
+        $tr.prev().before($tr);
+    };
+
+    /**------------------------------------------------------------
+    * 리스트 순서 변경 이벤트(DOWN)
+    ------------------------------------------------------------*/
+    var fnClickSortNoDown = function(event) {
+        var $tr = $(event.currentTarget).closest("tr");
+        $tr.next().after($tr);
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 리스트 수정 폼 세팅
+    ------------------------------------------------------------*/
+    var fnClickEditWork = function(event) {
+        _strMode = _strModeUpd;
+
+        COMMON.Utils.fnFrmReset("frmUpdMenu");
+
+        var menuNo = $(event.currentTarget).data("menuno");
+
+        var obj = {
+            requestData: {
+                menuNo: menuNo
+            },
+            strCallUrl: _strMenuPath + "/selectMenuList",
+            strCallBack: function(objJson) {
+                if(objJson.intRetCode !== 0) {
+                    COMMON.Msg.fnAlert(objJson.strRetMsg);
+
+                    $("#divUpdMenuModal").modal("hide");
+                } else {
+                    var menuList = objJson.data[0];
+
+                    $("#hidUpdMenuNo").val(menuList.menuNo);
+                    $("#hidUpdMenuGroupNo").val(menuList.menuGroupNo);
+                    $("#hidUpdSortNo").val(menuList.sortNo);
+
+                    $("#frmUpdMenu [id='txtUpdMenuGroupName']").val($("#selMenuGroupNo").find("option:selected").text());
+                    $("#frmUpdMenu [id='txtUpdMenuName']").val(menuList.menuName);
+                    $("#frmUpdMenu [id='txtUpdMenuLink']").val(menuList.menuLink);
+                    $("#frmUpdMenu [id='txtUpdMenuDivSgmnt']").val(menuList.menuDivSgmnt);
+                    $("#frmUpdMenu [id='txtUpdMenuDesc']").val(menuList.menuDesc);
+                    $("#frmUpdMenu [name='useFlag'][value='{0}']".format(menuList.useFlag)).prop("checked", true);
+
+                    $("#divUpdMenuModal").modal("show");
+                }
+            },
+            isModalMsg: false
+        };
+
+        COMMON.Ajax.fnRequest(obj);
+    };
+
+    /**------------------------------------------------------------
+    * 등록 클릭 이벤트
+    ------------------------------------------------------------*/
+    var fnClickRegistMenu = function() {
+        _strMode = _strModeIns;
+
+        COMMON.Utils.fnFrmReset("frmInsMenu");
+
+        $("#hidInsMenuNo").val("0");
+        $("#hidInsMenuGroupNo").val($("#selMenuGroupNo").find("option:selected").val());
+        $("#txtInsMenuGroupName").val($("#selMenuGroupNo").find("option:selected").text());
+        $("#frmInsMenu [name='useFlag'][value='true']").attr("checked", "checked");
+    };
+
+    /**------------------------------------------------------------
+    * 저장 클릭 이벤트(modal)
+    ------------------------------------------------------------*/
+    var fnClickSaveMenuModal = function() {
+        if(!$("#frm{0}Menu".format(_strMode)).valid()) {
+            return;
+        }
+
+        var strInsConfirmMsg = /*[[#{'common.msg.confirmIns'}]]*/ '등록하시겠습니까?';
+        var strUpdConfirmMsg = /*[[#{'common.msg.confirmUpd'}]]*/ '수정하시겠습니까?';
+        var strConfirmMsg    = _strMode === _strModeIns ? strInsConfirmMsg : strUpdConfirmMsg;
+
+        COMMON.Msg.fnConfirmWithModal(strConfirmMsg, "div{0}MenuModal".format(_strMode), true, function() {
+            var sObj         = $("#frm{0}Menu".format(_strMode)).serializeObject();
+            sObj.menuNo      = _strMode === _strModeUpd ? $("#hidUpdMenuNo").val() : $("#hidInsMenuNo").val();
+            sObj.menuName    = _strMode === _strModeUpd ? $("#txtUpdMenuName").val() : $("#txtInsMenuName").val();
+            sObj.menuGroupNo = _strMode === _strModeUpd ? $("#hidUpdMenuGroupNo").val() : $("#hidInsMenuGroupNo").val();
+            sObj.sortNo   = _strMode === _strModeUpd ? $("#hidUpdSortNo").val() : null;
+            sObj.useFlag     = $("#frm{0}Menu".format(_strMode)).find("input[name='useFlag']:checked").val();
+
+            var strSuccessMsg = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+            var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+
+            var obj = {
+                requestData   : sObj,
+                strCallUrl    : _strMenuPath + "/mergeMenu",
+                strCallBack   : "fnSearchMenu",
+                isModalMsg    : true,
+                strSuccessMsg : strSuccessMsg,
+                strErrorMsg   : strErrorMsg
+            };
+
+            COMMON.Ajax.fnRequest(obj);
+        });
+
+        $("#div{0}MenuModal".format(_strMode)).modal("hide");
+    };
+
+    /**------------------------------------------------------------
+    * 메뉴 리스트 저장 클릭 이벤트(modal)
+    ------------------------------------------------------------*/
+    var fnClickEditMenuList = function() {
+        var strConfirmMsg = /*[[#{'common.msg.confirmUpd'}]]*/ '수정하시겠습니까?';
+        var strSuccessMsg = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+        var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+
+        COMMON.Msg.fnConfirm(strConfirmMsg, function() {
+            var arrMenuList   = [];
+            var sortNo        = 1;
+            var adminNo       = /*[[${#request.getAttribute('adminNo')}]]*/ '1234'; //관리자 번호
+
+            $("#tbMenu").find("tbody tr").each(function() {
+                var objMenu = {};
+                var useFlag = $(this).find("td:eq(5)").text() === 'Y' ? true : false;
+
+                objMenu["menuNo"]    = $(this).find("td:eq(1)").text();
+                objMenu["sortNo"]    = sortNo++;
+                objMenu["useFlag"]   = useFlag;
+                objMenu["adminNo"]   = adminNo;
+
+                arrMenuList.push(objMenu);
+            });
+
+            var obj = {
+                requestData: {
+                    menuList: arrMenuList
+                },
+                strCallUrl    : _strMenuPath + "/updateMenuList",
+                strCallBack   : "fnSearchMenu",
+                isModalMsg    : true,
+                strSuccessMsg : strSuccessMsg,
+                strErrorMsg   : strErrorMsg
+            };
+
+            COMMON.Ajax.fnRequest(obj);
+        });
+    };
+
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

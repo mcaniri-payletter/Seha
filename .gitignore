@@ -1,0 +1,40 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### logback 로그 파일 제외 처리 ###
+*.log
+/services
+
+### gradle 관련 파일 예외 처리 ###
+.gradle/
+build/
+out/
+
+### javaDoc 관련 파일 예외 처리 ###
+/document/javaDoc
+
+
+

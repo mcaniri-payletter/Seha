@@ -1,0 +1,312 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 전체 로그인 레이아웃
+# Date   : 2018.09.28
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="text/html;charset=UTF-8" />
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title th:text="${@environment.getProperty('browser.title')}"></title>
+    <!-- 공통 CSS 영역 -->
+    <th:block th:include="layout/config :: common_css"></th:block>
+    <!-- Custom CSS 영역 -->
+    <th:block layout:fragment="customCSS"></th:block>
+    <!-- 공통 Javascript 영역 -->
+    <th:block th:include="layout/config :: common_js"></th:block>
+</head>
+<body class="hold-transition login-page">
+<!-- 로그인 화면 -->
+<div class="login-box">
+    <div class="login-logo">
+        <a href="javascript:;"><span th:text="#{'login.adminSite'} + ' ' + ${@environment.getProperty('location')}"></span></a>
+    </div>
+    <!-- /.login-logo -->
+    <div class="login-box-body">
+        <p class="login-box-msg"><th:block th:text="#{'login.adminService'}"></th:block></p>
+
+        <form id="frmLogin">
+            <input type="hidden" id="ReturnUrl" name="strReturnUrl" value="">
+            <div class="form-group has-feedback">
+                <input type="text" id="txtLoginId" name="strLoginId" class="form-control" maxlength="12" placeholder="Admin ID" required>
+                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <input type="password" id="txtPassword" name="strPassword" class="form-control" maxlength="20"  placeholder="Password" style="font-family: Arial;" required>
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <input type="text" id="txtSMS" name="strSMS" class="form-control" maxlength="12"  placeholder="Mobile Number (without '-')" style="font-family: Arial;" >
+                <span class="glyphicon glyphicon-phone form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback"><span id="smsTimer"></span></div>
+
+            <div class="row">
+                <div class="col-xs-8"></div>
+                <!-- /.col -->
+                <div class="col-xs-4">
+                    <button class="btn btn-primary btn-block btn-flat" type="button" id="btnLogin">Sign In</button>
+                </div>
+                <!-- /.col -->
+            </div>
+        </form>
+        <!--<a href="#">I forgot my password</a><br>-->
+    </div>
+    <!-- /.login-box-body -->
+</div>
+
+<!-- 공통 Modal 영역 -->
+<th:block th:replace="layout/modal :: modalFragment"></th:block>
+
+<!-- BEGIN LOGIN CONFIRM MODAL -->
+<button id="btnModalLoginConfirm" data-toggle="modal" data-target="#loginConfirmModal" style="width:0px; height:0px; display:none;"></button>
+<div class="modal" id="loginConfirmModal" data-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" id="btnConfirmModalTop" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <i class="fa fa-desktop fa-2x"></i>
+                <div class="alert login-alert bg-black-active">
+                    <span th:text="#{'login.lastAccessDate'} + ' : '">최종 접속일시 : </span>
+                    <span id="spFinalAccessTime"></span>
+                    <br/><br/>
+                    <span th:text="#{'login.lastIP'} + ' : '">최종 IP : </span>
+                    <span id="spFinalAccessIp"></span>
+                    <br/><br/>
+                    <span th:text="#{'login.msgAccessLog'}">본인이 접속한 내역이 아니면 반드시 관리자에게 알려 주시기 바랍니다.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnLoginConfirmModal" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.confirm'}" onclick="eval(strAlertCallBack)();">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END LOGIN CONFIRM MODAL -->
+
+<!-- BEGIN CHANGE PASSWORD MODAL -->
+<button id="btnModalPW" data-toggle="modal" data-target="#PWModal" style="width:0px; height:0px; display:none;"></button>
+<div class="modal" id="PWModal" tabindex="-1" role="dialog" aria-labelledby="modalPW" data-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <form id="frmpw">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" id="btnAlertModalTop" class="close" data-dismiss="modal" aria-label="Close" onclick="COMMON.Utils.fnFrmReset('frmpw');"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <i class="fa fa-clock-o fa-2x"></i>
+                    <h5 id="modalPW" class="basic-align-center"></h5>
+                    <div class="form-group has-feedback">
+                        <input class="form-control" type="password" id="inpCurrPwd" name="currPwd" th:placeholder="#{'login.msgInputCurrPwd'}" style="font-family: Arial;" maxlength=20>
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input class="form-control" type="password" id="inpNewPwd" name="newPwd" th:placeholder="#{'login.msgInputNewPwd'}" style="font-family: Arial;" maxlength=20>
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input class="form-control" type="password" id="inpReNewPwd" name="reNewPwd" th:placeholder="#{'login.msgInputReNewPwd'}" style="font-family: Arial;" maxlength=20>
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal" onclick="COMMON.Utils.fnFrmReset('frmpw');" th:text="#{'common.label.cancel'}">취소</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnChangePW" th:text="#{'common.label.save'}">저장</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 비밀번호 초기화 모달 화면 -->
+<div layout:fragment="content"></div>
+
+<th:block layout:fragment="customJS">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        //Timer 테스트
+        var timeLimit    = 181;
+        var expendSecond = 0;
+
+        var timing = setInterval( function () {
+
+            expendSecond = expendSecond + 1;
+
+            var timeLeft = timeLimit - expendSecond;
+
+            var minutes = Math.floor(timeLeft / 60);
+            if (minutes < 1) minutes="0"+minutes;
+            var seconds = Math.floor((timeLeft % 60) % 1000);
+            if (seconds < 10) seconds="0"+seconds;
+
+            document.getElementById("smsTimer").innerHTML = "남은시간 : " + minutes + ":" + seconds;
+
+            if (timeLeft == 1) {
+                clearInterval(timing);
+                expendSecond = 0;
+                document.getElementById("smsTimer").innerHTML = "It's over";
+            }
+        }, 1000);
+
+        $(function() {
+            fnInitEvent();
+            fnSetValidate();
+            fnInitForm();
+            fnSetInitPwdFormValidate();
+            fnInitPwdEvent();
+        });
+
+        function fnInitEvent() {
+            $("#btnLogin").on("click", fnLoginProc);
+            $("#frmLogin input.form-control").on("keydown", function(event) {if(13 == event.which) fnLoginProc();});
+        }
+
+        function fnSetValidate() {
+            var arrValidate = {
+                FORMID  : "frmLogin",
+                VARIABLE: {
+                    txtID : { minlength: 6, maxlength: 20, required: true },
+                    txtPwd: { minlength: 6, maxlength: 20, required: true }
+                }
+            }
+
+            COMMON.Utils.fnSetValidate(arrValidate);
+        }
+
+        function fnInitForm() {
+            $("#txtID").focus();
+        }
+
+        function fnLoginProc() {
+            if(!$("#frmLogin").valid()) {
+                return;
+            }
+
+            var obj = {
+                requestData: {
+                    adminID   : $("#txtLoginId").val(),
+                    adminPwd  : $("#txtPassword").val()
+                },
+                strCallUrl : "/login/loginProc",
+                strCallBack: "fnLoginProcRet"
+            }
+
+            COMMON.Ajax.fnRequest(obj);
+        }
+
+        function fnLoginProcRet(objJson) {
+            // 정상
+            if("0" == objJson.intRetCode) {
+                COMMON.Msg.fnLoginConfirm(objJson, function() {
+                    location.href = objJson.data.menuLink;
+                });
+            }
+            // 최종 로그인 일자 초과 (비밀번호 변경 Modal 호출)
+            else if("9005" == objJson.intRetCode) {
+                $("#modalPW").html(objJson.strRetMsg);
+                $('#btnModalPW').click();
+            } else {
+                COMMON.Msg.fnAlert(objJson.strRetMsg);
+            }
+        }
+
+        var fnSetInitPwdFormValidate = function() {
+            var arrValidate = {
+                FORMID: "frmpw",
+                VARIABLE: {
+                    currPwd: {required: true, maxlength: 20, minlength: 8},
+                    newPwd: {
+                        required: true,
+                        maxlength: 20,
+                        minlength: 8,
+                        passwordCheck: true,
+                        pwCheckConsecChars: true
+                    },
+                    reNewPwd: {
+                        required: true,
+                        maxlength: 20,
+                        minlength: 8,
+                        equalTo: "#inpNewPwd",
+                        passwordCheck: true,
+                        pwCheckConsecChars: true
+                    }
+                }
+            }
+
+            COMMON.Utils.fnSetValidate(arrValidate);
+        }
+
+        var fnInitPwdEvent = function() {
+            $("#btnChangePW").on("click", fnChangePwd);
+            $("#btnCancel").on("click", function() {
+                document.location.href = "login/login";
+            });
+            $("#loginConfirmModal").on("keydown", function(event) {
+                if(13 == event.keyCode) {
+                    $("#btnLoginConfirmModal").click();
+                }
+            });
+        }
+
+        // 공통 Confirm
+        $("#btnAlertModalTop, #btnAlertModalBottom").on("click", function() {
+            $('#alertModal').modal('hide');
+
+            if(strPreModalId != "" && strPreModalId != undefined && isPreModalOpen == true) {
+                $('#' + strPreModalId).modal('show');
+                strPreModalId = "";
+            }
+        });
+
+        var fnChangePwd = function() {
+            if(!$("#frmpw").valid()) {
+                return;
+            }
+
+            if($("#inpCurrPwd").val() == $("#inpNewPwd").val()) {
+                var strErrMsg = /*[[#{'common.msg.sameCurrentPwd'}]]*/ '새로운 비밀번호는 현재 비밀번호와 동일할 수 없습니다.';
+                COMMON.Msg.fnAlertWithModal(strErrMsg, "PWModal", true);
+                COMMON.Utils.fnFrmReset('frmpw');
+                return;
+            }
+
+            var obj = {
+                requestData: {
+                    adminID:  $("#txtLoginId").val(),
+                    currPwd:  $("#inpCurrPwd").val(),
+                    newPwd:   $("#inpNewPwd").val(),
+                    reNewPwd: $("#inpReNewPwd").val()
+                },
+                strCallUrl: "/administrator/administrator/changePwd",
+                strCallBack: "fnAdministratorPwdChgRet"
+            };
+            COMMON.Ajax.fnRequest(obj);
+        }
+
+        var fnAdministratorPwdChgRet = function(objJson) {
+            var strSuccessMsg = /*[[#{'common.msg.success'}]]*/ '작업이 완료되었습니다.';
+            var strErrorMsg   = /*[[#{'common.msg.failed'}]]*/ '작업이 실패하었습니다.';
+
+            if(objJson.intRetCode !== 0) {
+                COMMON.Msg.fnAlertWithModal(strErrorMsg + "(" + objJson.strRetMsg + ")", "PWModal", true);
+            } else {
+                $("input").val("");
+                $("#PWModal").modal('hide');
+                COMMON.Msg.fnAlert(strSuccessMsg, function() {
+                    document.location.href = "login/login";
+                });
+            }
+        }
+
+        /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>

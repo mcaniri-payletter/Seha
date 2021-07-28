@@ -1,0 +1,112 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 고객사 편집
+# Date   : 2021.07.26
+#------------------------------------------------------------------------>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <div class="box-title">
+
+        </div>
+        <!-- BEGIN BASIC INFO AREA -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'customer.사업자정보'}">사업자 정보</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <form id="frmEditCustomerCCode" name="frmEditCustomerCCode">
+                    <input type="hidden" id="hidEditModeCCode" name="editMode" th:value="${EDIT_MODE}" />
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label"><span th:text="#{'customer.상호'}">상호</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtCompanyName" data-toggle="tooltip" name="companyName" class="form-control" maxlength="50"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><span th:text="#{'customer.사업자번호'}">사업자번호</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtCorporateNumber" data-toggle="tooltip" name="corporateNumber" class="form-control" maxlength="50"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><span th:text="#{'customer.사업자형태'}">사업자형태</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtCorporateType" data-toggle="tooltip" name="corporateType" class="form-control" maxlength="50"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><span th:text="#{'customer.대표자명'}">대표자명</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtRepresentativeName" data-toggle="tooltip" name="representativeName" class="form-control" maxlength="50"/>
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label"><span th:text="#{'customer.매출구분'}">매출구분</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtSalesType" data-toggle="tooltip" name="salesType" class="form-control" maxlength="50"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><span th:text="#{'customer.업태'}">업태</span> <i class="fa fa-asterisk text-danger"></i></label>
+                            <input type="text" id="txtBusinessCond" data-toggle="tooltip" name="businessCond" class="form-control" maxlength="50"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- END BASIC INFO AREA -->
+
+        <!-- /.box-body -->
+        <div class="box">
+            <div class="box-footer">
+                <div class="pull-right">
+                    <button type="button" class="btn btn-default btn-sm" id="btnCnlSample" th:text="#{'common.label.cancel'}">취소</button>
+                    <th:block th:switch="${EDIT_MODE}">
+                        <button type="button" class="btn btn-danger btn-sm" th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_INS}" id="btnInsCustomer" th:text="#{'common.label.register'}">등록</button>
+                        <button type="button" class="btn btn-danger btn-sm" th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_UPD}" id="btnUpdCustomer" th:text="#{'common.label.update'}">수정</button>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </section>
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_MENU}]]*/ '/menuAuthority/menu';
+    var _authCode = /*[[${#request.getAttribute('authCode')}]]*/'';
+    var _strMode = $("#hidEditMode").val();
+
+    $(function() {
+        fnInitPage();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 페이지 초기화
+     ------------------------------------------------------------*/
+    function fnInitPage() {
+        // 수정 화면일 경우, 상세 정보 조회
+        if(_strMode ==  /*[[${T(com.sbank.admin.common.constants.GlobalConstants).MODE_UPD}]]*/ 'Upd') {
+
+        }
+    }
+
+    /**------------------------------------------------------------
+     * 이벤트 초기화
+     ------------------------------------------------------------*/
+    function fnInitEvent() {
+        // '취소' 버튼 이벤트
+        $("#btnCnlSample").on("click", function() {
+            COMMON.Navi.fnGoMenu(MENU.Customer);
+        });
+    }
+    /*]]>*/
+</script>
+</th:block>
+</html>

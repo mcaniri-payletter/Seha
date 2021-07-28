@@ -1,0 +1,155 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 관리자 로그인 실패 View
+# Date   : 2020.01.20
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header with-border">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewCriteria'}">조회 조건</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <form id="frmSearchLoginFailHist">
+                    <input type="hidden" name="strSortType">
+                    <input type="hidden" name="strSortColumn">
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.term'}">기간</label>
+                            <div class="input-group">
+                                <input type="hidden" id="hidFromYMD" name="strFromYMD" th:value="${#request.getAttribute('strFromYMD')}">
+                                <input type="hidden" id="hidToYMD" name="strToYMD" th:value="${#request.getAttribute('strToYMD')}">
+                                <input type="text" class="form-control pull-right" id="txtRangeYMD">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.adminID'}">관리자ID</label>
+                            <input type="text" id="txtTryAdminID" name="adminID" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.ipAddress'}">아이피 주소</label>
+                            <input type="text" id="txtIPAddr" name="ipAddr" class="form-control">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer">
+                <div class="pull-right">
+                    <div>
+                        <button type="button" id="btnSearch" class="btn btn-default btn-sm" th:text="#{'common.label.search'}">조회</button>
+                        <button type="button" id="btnExcel" class="btn btn-warning btn-sm" th:style="${#request.getAttribute('dnAvailFlag')} ? '' : 'display: none'" th:text="#{'common.label.excel'}">엑셀</button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-footer-->
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewResults'}">조회 결과</h3>
+            </div>
+            <div class="box-body" id="div_searchResult" style="display: none;">
+                <table class="table table-bordered table-striped table-width100" id="tblAdminLoginFailHist">
+                    <thead>
+                        <tr>
+                            <th id="adminID" class="sort_header" th:text="#{'loginFailureRecord.attempAdminID'}">시도관리자ID</th>
+                            <th id="errCode" class="sort_header" th:text="#{'common.label.errCode'}">오류코드</th>
+                            <th id="errMsg"  class="sort_header" th:text="#{'common.label.errMsg'}">오류메시지</th>
+                            <th id="ipAddr"  class="sort_header" th:text="#{'common.label.ipAddress'}">아이피주소</th>
+                            <th id="regDate" class="sort_header" th:text="#{'common.label.regDate'}">등록일시</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _objAdminLoginFailHistTable;
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_ADMIN_LOGIN_FAIL_HIST}]]*/ '/administrator/adminLoginFailHist';
+
+    $(function() {
+        fnInitPage();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 페이지 초기화
+     ------------------------------------------------------------*/
+    var fnInitPage = function() {
+        COMMON.Utils.fnInitSearchDateRangePicker("#frmSearchLoginFailHist", "#hidFromYMD", "#hidToYMD", "#txtRangeYMD");
+    }
+
+    /**------------------------------------------------------------
+     * 이벤트 초기화
+     ------------------------------------------------------------*/
+    var fnInitEvent = function() {
+        $("#btnSearch").on("click", fnCreateDataTables);
+
+        $(".sort_header").on("click", function() {
+            COMMON.Utils.fnSortSettings(this, $("#frmSearchLoginFailHist"));
+        });
+    }
+
+    /**------------------------------------------------------------
+     * 관리자 로그인 실패 리스트 조회
+     ------------------------------------------------------------*/
+    var fnCreateDataTables = function() {
+        if(typeof _objAdminLoginFailHistTable == "undefined") {
+            _objAdminLoginFailHistTable = COMMON.Ajax.CreateDataTable("#tblAdminLoginFailHist", true, {
+                url: _strMenuPath + '/selectAdminLoginFailHistList',
+                data: function() {
+                    return $("#frmSearchLoginFailHist").serializeObject();
+                },
+                columns: [
+                    { "data": "adminID",     "class": "td-center" },
+                    { "data": "errCode",     "class": "td-center" },
+                    { "data": "errMsgTrans", "class": "td-center" },
+                    { "data": "ipAddr",      "class": "td-center" },
+                    { "data": "regDate",     "class": "td-center" }
+                ],
+                order: [ 4, "desc" ]
+            });
+        } else {
+            _objAdminLoginFailHistTable.clearPipeline();
+            _objAdminLoginFailHistTable.ajax.reload();
+        }
+
+        $("#div_searchResult").show();
+    }
+
+    // '엑셀' 버튼 이벤트
+    $("#btnExcel").on("click", function() {
+        var strConfirmMsg   = /*[[#{'common.msg.confirmDownExcel'}]]*/ '엑셀을 다운로드 하시겠습니까?';
+        COMMON.Msg.fnConfirm(strConfirmMsg, function() {
+            var strExcelPath = _strMenuPath + "/excelDownload";
+            COMMON.Utils.fnFileDownload("GET", $("#frmSearchLoginFailHist").serializeObject(), strExcelPath);
+        });
+    });
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

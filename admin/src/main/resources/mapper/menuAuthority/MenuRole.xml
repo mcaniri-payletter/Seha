@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 메뉴 역할 Mapper ■ payletter ■ 2018. 4. 6.
+     ################################################## -->
+<mapper namespace="menuRole">
+<!-- ##################################################
+    # 메뉴 역할 목록 수정
+    ################################################### -->
+    <select id="selectMenuRoleList" resultType="MenuRole">
+        -- menuRole.selectMenuRoleList : 메뉴 역할 목록 조회
+        SELECT AMRM.menuRoleNo                                AS menuRoleNo
+              ,AMRM.menuRoleName                              AS menuRoleName
+              ,AMRM.adminNo                                   AS adminNo
+              ,AM.adminID                                     AS adminID
+              ,AMRM.useFlag                                   AS useFlag
+              ,TO_CHAR(AMRM.regDate,'YYYY-MM-DD HH24:MI:SS')  AS regDate
+              ,TO_CHAR(AMRM.updDate,'YYYY-MM-DD HH24:MI:SS')  AS updDate
+        FROM   TAdminMenuRoleMgmt AMRM
+        LEFT OUTER JOIN TAdminMgmt AM ON (AMRM.adminNo = AM.adminNo)
+        ORDER BY AMRM.menuRoleNo
+    </select>
+
+<!-- ##################################################
+    # 메뉴 역할 상세 조회
+    ################################################### -->
+    <select id="selectMenuRoleDtl" parameterType="MenuRole" resultType="MenuRole">
+        -- menuRole.selectMenuRoleDtl : 메뉴 역할 상세 조회
+        SELECT menuGroupNo                       AS menuGroupNo
+              ,sortNo                            AS menuGroupSortNo
+              ,0                                 AS menuNo
+              ,menuGroupName                     AS menuName
+              ,0                                 AS menuSortNo
+              ,1                                 AS depth
+              ,false                             AS useFlag
+              ,0                                 AS authCode
+              ,false                             AS ciReadFlag
+              ,false                             AS dnAvailFlag
+        FROM   TAdminMenuGroupMgmt
+        WHERE  useFlag = true
+        UNION ALL
+        SELECT AMM.menuGroupNo                   AS menuGroupNo
+              ,AMGM.sortNo                       AS menuGroupSortNo
+              ,AMM.menuNo                        AS menuNo
+              ,AMM.menuName                      AS menuName
+              ,AMM.sortNo                        AS menuSortNo
+              ,2                                 AS depth
+              ,AMM.useFlag                       AS useFlag
+              ,COALESCE(AMRD.authCode, 0)        AS authCode
+              ,COALESCE(AMRD.cIReadFlag, false)  AS ciReadFlag
+              ,COALESCE(AMRD.dnAvailFlag, false) AS dnAvailFlag
+        FROM   TAdminMenuMgmt AMM
+        INNER JOIN TAdminMenuGroupMgmt AMGM    ON  AMM.menuGroupNo = AMGM.menuGroupNo
+        LEFT OUTER JOIN TAdminMenuRoleDtl AMRD ON  AMM.menuNo      = AMRD.menuNo
+                                               AND AMRD.menuRoleNo = ${menuRoleNo}
+        ORDER BY menuGroupSortNo, depth, menuSortNo
+    </select>
+
+<!-- ##################################################
+    # 메뉴 역할 상세 삭제
+    ################################################### -->
+    <delete id="deleteMenuRoleDtl" parameterType="MenuRole">
+        -- menuRole.deleteMenuRoleDtl : 메뉴 역할 상세 삭제
+        DELETE FROM TAdminMenuRoleDtl
+        WHERE menuRoleNo = #{menuRoleNo}
+    </delete>
+
+<!-- ##################################################
+    # 메뉴 역할 Merge
+    ################################################### -->
+    <update id="mergeMenuRole" parameterType="MenuRole">
+        <selectKey keyProperty="menuRoleNo" resultType="short" order="AFTER">
+            SELECT MAX(menuRoleNo)
+            FROM TAdminMenuRoleMgmt
+        </selectKey>
+        -- menuRole.mergeMenuRole : 메뉴 역할 Merge
+        WITH MERGE AS (
+            UPDATE TAdminMenuRoleMgmt
+            SET menuRoleName = #{menuRoleName}
+               ,useFlag      = #{useFlag}
+               ,adminNo      = #{adminNo}
+               ,updDate      = NOW()
+            WHERE menuRoleNo = #{menuRoleNo}
+            RETURNING *
+        )
+        INSERT INTO TAdminMenuRoleMgmt (menuRoleName, adminNo, useFlag)
+        SELECT #{menuRoleName}, #{adminNo}, #{useFlag}
+        WHERE NOT EXISTS (SELECT * FROM MERGE)
+    </update>
+
+<!-- ##################################################
+    # 메뉴 역할 상세 등록
+    ################################################### -->
+    <insert id="insertMenuRoleDtl" parameterType="MenuRole">
+        -- menuRole.insertMenuRoleDtl : 메뉴 역할 상세 등록
+        INSERT INTO TAdminMenuRoleDtl (menuRoleNo, menuNo, authCode, ciReadFlag, dnAvailFlag, adminNo)
+                               VALUES (#{menuRoleNo}, #{menuNo}, #{authCode}, #{ciReadFlag}, #{dnAvailFlag}, #{adminNo})
+    </insert>
+</mapper>

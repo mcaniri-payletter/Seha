@@ -1,0 +1,25 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : Content Header 영역
+# Date   : 2020.01.21
+#------------------------------------------------------------------------>
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <!-- Content Header (Page header) -->
+    <section th:fragment="contentHeaderFragment" class="content-header">
+        <h1>
+            <i class="fa fa-square"></i>&nbsp;
+            <th:block th:text="${#request.getAttribute('menuName')}"></th:block>
+            <span th:switch="${EDIT_MODE}">
+                <th:block th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_INS}" th:text="#{'common.label.register'}">등록</th:block>
+                <th:block th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_UPD}" th:text="#{'common.label.update'}">수정</th:block>
+                <th:block th:case="${T(com.sbank.admin.common.constants.GlobalConstants).MODE_DTL}" th:text="#{'common.label.detail'}">상세</th:block>
+            </span>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="javascript:;"><th:block th:text="${#request.getAttribute('menuGroupName')}"></th:block></a></li>
+            <li class="active" th:text="${#request.getAttribute('menuName')}"></li>
+        </ol>
+    </section>
+</html>

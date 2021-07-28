@@ -1,0 +1,219 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 고객사 목록 View
+# Date   : 2021.07.23
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layout/default">
+
+<th:block layout:fragment="content">
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewCriteria'}">조회 조건</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab1" id="cCodeTab" data-toggle="tab" th:text="#{'customer.C-CODE'}">C-CODE</a></li>
+                <li><a href="#tab2" id="sCodeTab" data-toggle="tab" th:text="#{'customer.S-CODE'}">S-CODE</a></li>
+            </ul>
+            <div class="box-body">
+                <form id="frmSearchCustomer">
+                    <input type="hidden" name="strSortType">
+                    <input type="hidden" name="strSortColumn">
+                    <div class="row form-row form-group-sm">
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'customer.조회조건'}">조회 조건</label>
+                            <select id="selSearchCond" name="searchCond" class="select2 form-control">
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).C_CODE}" th:text="#{'customer.C-CODE'}">C-CODE</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).S_CODE}" th:text="#{'customer.S-CODE'}">S-CODE</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" th:text="#{'common.label.availability'}">사용 여부</label>
+                            <select id="selUseFlag" name="useFlag" class="select2 form-control">
+                                <option value="" th:text="#{'common.label.all'}">전체</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_Y}" th:text="#{'common.label.useFlag.y'}">사용</option>
+                                <option th:value="${T(com.sbank.admin.common.constants.GlobalConstants).USEFLAG_N}" th:text="#{'common.label.useFlag.n'}">미사용</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer">
+                <div class="pull-right">
+                    <div>
+                        <button type="button" id="btnSearchCustomer" class="btn btn-default btn-sm" th:text="#{'common.label.search'}">조회</button>
+                        <button type="button" id="btnGoRegistCustomer" class="btn btn-primary btn-sm" th:style="${#request.getAttribute('authCode')} == 1 ? '' : 'display: none'" th:text="#{'common.label.register'}">등록</button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-footer-->
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <i class="fa fa-chevron-circle-right"></i>
+                <h3 class="box-title" th:text="#{'common.label.viewResults'}">조회 결과</h3>
+            </div>
+            <div class="box-body" id="div_searchResult">
+                <div class="tab-content modal-div-top">
+                    <!-- BEGIN TAB 1 VIEW AREA -->
+                    <div class="tab-pane active" id="tab1">
+                        <table class="table table-bordered table-striped table-width100" id="tblCustomerCCode">
+                            <thead>
+                            <tr>
+                                <th th:text="#{'common.label.no'}">No</th>
+                                <th id="c_cCode" class="sort_header" th:text="#{'customer.C-CODE'}">C-CODE</th>
+                                <th id="c_corporateName"  class="sort_header" th:text="#{'customer.사업자명'}">사업자명</th>
+                                <th id="c_corporateNumber"  class="sort_header" th:text="#{'customer.사업자번호'}">사업자번호</th>
+                                <th id="c_creditCardSalesType" class="sort_header" th:utext="#{'customer.신용카드매출구분'}">신용카드<br>매출구분</th>
+                                <th id="c_representativeName" class="sort_header" th:text="#{'customer.대표자명'}">대표자명</th>
+                                <th id="c_repSCode" class="sort_header" th:text="#{'customer.대표S-CODE'}">대표 S-CODE</th>
+                                <th id="c_repServiceName" class="sort_header" th:text="#{'customer.대표서비스명'}">대표 서비스명</th>
+                                <th id="c_status" class="sort_header" th:text="#{'customer.상태'}">상태</th>
+                                <th id="c_marketingManager" class="sort_header" th:text="#{'customer.영업담당자'}">영업담당자</th>
+                                <th id="c_sCodeList" class="sort_header" th:text="#{'customer.S-CODE리스트'}">S-CODE 리스트</th>
+                                <th id="c_payTypeList" class="sort_header" th:text="#{'customer.결제수단리스트'}">결제수단 리스트</th>
+                                <th id="c_regDate" class="sort_header" th:text="#{'customer.등록일'}">등록일</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- END TAB 1 VIEW AREA -->
+
+                    <!-- BEGIN TAB 2 VIEW AREA -->
+                    <div class="tab-pane" id="tab2">
+                        <table class="table table-bordered table-striped table-width100" id="tblCustomerSCode">
+                            <thead>
+                            <tr>
+                                <th th:text="#{'common.label.no'}">No</th>
+                                <th id="s_sCode" class="sort_header" th:text="#{'customer.S-CODE'}">S-CODE</th>
+                                <th id="s_repServiceName" class="sort_header" th:text="#{'customer.대표서비스명'}">대표 서비스명</th>
+                                <th id="s_cCode" class="sort_header" th:text="#{'customer.C-CODE'}">C-CODE</th>
+                                <th id="s_corporateName"  class="sort_header" th:text="#{'customer.사업자명'}">사업자명</th>
+                                <th id="s_corporateNumber"  class="sort_header" th:text="#{'customer.사업자번호'}">사업자번호</th>
+                                <th id="s_creditCardSalesType" class="sort_header" th:utext="#{'customer.신용카드매출구분'}">신용카드<br>매출구분</th>
+                                <th id="s_representativeName" class="sort_header" th:text="#{'customer.대표자명'}">대표자명</th>
+                                <th id="s_status" class="sort_header" th:text="#{'customer.상태'}">상태</th>
+                                <th id="s_marketingManager" class="sort_header" th:text="#{'customer.영업담당자'}">영업담당자</th>
+                                <th id="s_payTypeList" class="sort_header" th:text="#{'customer.결제수단리스트'}">결제수단 리스트</th>
+                                <th id="s_regDate" class="sort_header" th:text="#{'customer.등록일'}">등록일</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- END TAB 2 VIEW AREA -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</th:block>
+<th:block layout:fragment="customJS">
+<!-- BEGIN CORE JS -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var _objCustomerTable;
+    var _strMenuPath = /*[[${T(com.sbank.admin.common.constants.PathConstants).PATH_CONTROLLER_CUSTOMER}]]*/ '/customer/customer';
+
+    $(function() {
+        fnInitPage();
+        fnInitEvent();
+    });
+
+    /**------------------------------------------------------------
+     * 페이지 초기화
+     ------------------------------------------------------------*/
+    function fnInitPage() {
+
+    }
+
+    /**------------------------------------------------------------
+     * 이벤트 초기화
+     ------------------------------------------------------------*/
+    function fnInitEvent() {
+        // '조회' 버튼 이벤트
+        $("#btnSearchCustomer").on("click", fnSearchCustomer);
+
+        // '등록' 버튼 이벤트
+        $("#btnGoRegistCustomer").on("click", function() {
+            fnGoEditCustomer(_strModeIns, null);
+        });
+
+        // '엑셀' 버튼 이벤트
+        $("#btnExcel").on("click", function() {
+            var strConfirmMsg   = /*[[#{'common.msg.confirmDownExcel'}]]*/ '엑셀을 다운로드 하시겠습니까?';
+            COMMON.Msg.fnConfirm(strConfirmMsg, function() {
+                var strExcelPath = _strMenuPath + "/excelDownload";
+                COMMON.Utils.fnFileDownload("GET", $("#frmSearchCustomer").serializeObject(), strExcelPath);
+            });
+        });
+
+        // 정렬 이벤트
+        $(".sort_header").on("click", function() {
+            COMMON.Utils.fnSortSettings(this, $("#frmSearchCustomer"));
+        });
+    }
+
+    /**------------------------------------------------------------
+     * 고객사 리스트 조회
+     ------------------------------------------------------------*/
+    function fnSearchCustomer() {
+        if(typeof _objCustomerTable == "undefined") {
+            _objCustomerTable = COMMON.Ajax.CreateDataTable("#tblCustomer", true, {
+                url: _strMenuPath + '/selectCustomerList',
+                data: function() {
+                    return $("#frmSearchCustomer").serializeObject();
+                },
+                columns: [
+                    { "data": "no",     "class": "td-center" },
+                    { "data": "cCode",     "class": "td-left" },
+                    { "data": "corporateName", "class": "td-left" },
+                    { "data": "corporateNumber",      "class": "td-left" },
+                    { "data": "creditCardSalesType",     "class": "td-left" },
+                    { "data": "representativeName",     "class": "td-left" },
+                    { "data": "repSCode",     "class": "td-left" },
+                    { "data": "repServiceName",     "class": "td-left" },
+                    { "data": "status",     "class": "td-left" },
+                    { "data": "marketingManager",     "class": "td-left" },
+                    { "data": "sCodeList",     "class": "td-center" },
+                    { "data": "payTypeList",     "class": "td-center" },
+                    { "data": "regDate",     "class": "td-center" }
+                ],
+                order: [ 12, "desc" ]
+            });
+        } else {
+            _objCustomerTable.clearPipeline();
+            _objCustomerTable.ajax.reload();
+        }
+
+        $("#div_searchResult").show();
+    }
+
+    /**------------------------------------------------------------
+     * 편집 화면 진입
+     ------------------------------------------------------------*/
+    function fnGoEditCustomer(strMode, object) {
+        var loc = _strMenuPath + "/customerEdit?editMode={0}".format(strMode);
+        if(strMode == _strModeUpd) {
+            loc += "&cCode={0}".format(object);
+        }
+        location.href = loc;
+    }
+
+    /*]]>*/
+</script>
+<!-- END CORE JS -->
+</th:block>
+</html>

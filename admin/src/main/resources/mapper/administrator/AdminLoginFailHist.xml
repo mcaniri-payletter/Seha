@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 로그인 실패 이력 Mapper ■ payletter ■ 2018. 4. 10.
+     ################################################### -->
+<mapper namespace="adminLoginFailHist">
+<!-- ##################################################
+    # 관리자 로그인 실패 이력 등록
+    ################################################### -->
+    <insert id="insertAdminLoginFailHist" parameterType="AdminLoginFailHist">
+        -- login.insertAdminLoginFailHist : 관리자 로그인 실패 이력 등록
+        INSERT INTO TAdminLoginFailHist (adminID, errCode, errMsg, ipAddr)
+                                 VALUES (#{adminID}, #{errCode}, #{errMsg}, #{ipAddr})
+    </insert>
+
+<!-- ##################################################
+    # 관리자 목록 조회 Count 영역
+    ################################################### -->
+    <select id="selectAdminLoginFailHistCnt" resultType="int">
+        -- administrator.selectAdministratorCnt : 관리자 목록 개수
+        SELECT COUNT(*)
+        FROM   TAdminLoginFailHist ALFH
+        <include refid="sqlAdminLoginFailHistListWhere" />
+    </select>
+
+<!-- ##################################################
+    # 관리자 로그인 실패 이력 목록 조회 Body 영역
+    ################################################### -->
+    <sql id="sqlAdminLoginFailHistListBody">
+        SELECT ALFH.adminID
+               ,ALFH.errCode
+               ,ALFH.errMsg
+               ,ALFH.ipAddr
+               ,TO_CHAR(ALFH.regDate, 'YYYY-MM-DD HH24:MI:SS') AS regDate
+        FROM   TAdminLoginFailHist ALFH
+    </sql>
+
+<!-- ##################################################
+    # 관리자 로그인 실패 이력 목록 조회 WHERE 영역
+    ################################################### -->
+    <sql id="sqlAdminLoginFailHistListWhere">
+        <where>
+            <if test="adminID != null and adminID !=''">
+                AND    ALFH.adminID LIKE CONCAT('%', #{adminID}, '%')
+            </if>
+            <if test="ipAddr != null and ipAddr != ''">
+                AND    ALFH.ipAddr LIKE CONCAT('%', #{ipAddr}, '%')
+            </if>
+            <if test="strFromYMD != null and strFromYMD != '' and strToYMD != null and strToYMD != ''">
+            <![CDATA[
+                AND    ALFH.regDate >= TO_TIMESTAMP(#{strFromYMD}, 'YYYY-MM-DD')
+                AND    ALFH.regDate < TO_TIMESTAMP(#{strToYMD}, 'YYYY-MM-DD')
+            ]]>
+            </if>
+        </where>
+    </sql>
+
+<!-- ##################################################
+    # 관리자 로그인 실패 이력 목록 조회 (페이징)
+    ################################################### -->
+    <select id="selectAdminLoginFailHistList" parameterType="AdminLoginFailHist" resultType="AdminLoginFailHist">
+        -- adminLoginFailHist.selectAdminLoginFailHistList : 관리자 로그인 실패 이력 목록 조회
+        <include refid="sqlAdminLoginFailHistListBody"/>
+        <include refid="sqlAdminLoginFailHistListWhere"/>
+        <include refid="common.sqlCommonSort"/>
+        <include refid="common.pagingSuffix"/>
+    </select>
+</mapper>

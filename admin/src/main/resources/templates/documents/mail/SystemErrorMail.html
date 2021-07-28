@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01//EN' 'http://www.w3.org/TR/html4/strict.dtd'>
+<HTML xmlns:th="http://www.w3.org/1999/xhtml">
+<HEAD>
+    <META HTTP-EQUIV='Content-Type'>
+    <STYLE type='text/css'>
+        BODY {
+            font: 9pt/12pt Tahoma
+        }
+
+        H1 {
+            font: 13pt/15pt Tahoma
+        }
+
+        H2 {
+            font: 9pt/12pt Tahoma
+        }
+
+        A:link {
+            color: red
+        }
+
+        A:visited {
+            color: maroon
+        }
+    </STYLE>
+</HEAD>
+<BODY>
+<TABLE width=500 border=0 cellspacing=10>
+    <TR>
+        <TD>
+            <b>Server</b><br/>
+            File Name : <span th:text="${fileName}"></span><br/>
+            Class Name : <span th:text="${className}"></span><br/>
+            Method Name : <span th:text="${methodName}"></span>
+
+            <br/><br/>
+            <b>Error Message</b><br/>
+            <span th:text="${errorMessage}"></span>
+
+            <br/><br/>
+            <b>Stack Trace</b><br/>
+            <span th:text="${stackTrace}"></span>
+        </TD>
+    </TR>
+</TABLE>
+</BODY>
+</HTML>

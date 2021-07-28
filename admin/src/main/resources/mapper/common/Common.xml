@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+# ■ 공통 Mapper ■ payletter ■ 2018. 4. 6.
+################################################### -->
+<mapper namespace="common">
+    <sql id="pagingSuffix">
+        LIMIT #{pageSize} OFFSET #{pageFechNo}
+    </sql>
+
+    <sql id="sqlCommonSort">
+        <choose>
+            <when test="strSortColumn != null and strSortColumn != '' and strSortType != null and strSortType != ''">
+                ORDER BY ${strSortColumn} ${strSortType}
+            </when>
+            <otherwise>
+                ORDER BY regDate DESC
+            </otherwise>
+        </choose>
+    </sql>
+
+<!-- ##################################################
+    # 관리자 접근 메뉴 조회
+    ################################################### -->
+    <select id="selectAccessMenu" parameterType="AccessMenu" resultType="AccessMenu">
+        -- common.selectAccessMenu : 관리자 접근 메뉴 조회
+        SELECT AMGM.menuGroupNo
+              ,AMGM.useFlag            AS menuGroupUseFlag
+              ,AMM.menuNo
+              ,AMGM.menuGroupName
+              ,AMM.menuName
+              ,AMM.useFlag             AS menuUseFlag
+              ,AMRM.useFlag            AS menuRoleUseFlag
+              ,AMRD.authCode
+              ,AMRD.ciReadFlag
+              ,AMRD.dnAvailFlag
+        FROM   TAdminMgmt AM
+        INNER JOIN TAdminMenuRoleMgmt  AMRM ON AM.menuRoleNo   = AMRM.menuRoleNo
+        INNER JOIN TAdminMenuRoleDtl   AMRD ON AMRM.menuRoleNo = AMRD.menuRoleNo
+        INNER JOIN TAdminMenuMgmt      AMM  ON AMRD.menuNo     = AMM.menuNo
+        INNER JOIN TAdminMenuGroupMgmt AMGM ON AMM.menuGroupNo = AMGM.menuGroupNo
+        WHERE  AM.adminID       = #{adminID}
+        AND    AM.useFlag       = true
+        AND    AMRM.useFlag     = true
+        AND    AMM.menuDivSgmnt = #{menuDivSgmnt}
+        AND    AMM.useFlag      = true
+        AND    AMGM.useFlag     = true
+    </select>
+
+<!-- ##################################################
+    # 메뉴 목록 조회
+    ################################################### -->
+    <select id="selectMenuList" parameterType="hashmap" resultType="AdminMenu">
+        -- common.selectMenuList : 메뉴 목록 조회
+        SELECT TBL.menuGroupNo
+              ,TBL.menuGroupName
+              ,TBL.menuGroupIcon
+              ,TBL.sortNo          AS menuGroupSortNo
+              ,0                   AS menuNo
+              ,''                  AS menuLink
+              ,1                   AS depth
+              ,0                   AS menuSortNo
+              ,false               AS useFlag
+              ,0                   AS authCode
+        FROM  (
+               SELECT AMGM.menuGroupNo
+                     ,AMGM.menuGroupName
+                     ,AMGM.menuGroupIcon
+                     ,AMGM.sortNo
+               FROM   TAdminMgmt AM
+               INNER JOIN TAdminMenuRoleMgmt  AMRM ON AM.menuRoleNo     = AMRM.menuRoleNo
+               INNER JOIN TAdminMenuRoleDtl   AMRD ON AMRM.menuRoleNo   = AMRD.menuRoleNo
+               INNER JOIN TAdminMenuMgmt      AMM  ON AMRD.menuNo       = AMM.menuNo
+               INNER JOIN TAdminMenuGroupMgmt AMGM ON AMM.menuGroupNo   = AMGM.menuGroupNo
+               WHERE AM.adminID   = #{adminID}
+               AND   AM.useFlag   = true
+               AND   AMGM.useFlag = true
+               AND   AMGM.sortNo != 0
+               GROUP BY AMGM.menuGroupNo, AMGM.menuGroupName, AMGM.menuGroupIcon, AMGM.sortNo
+        ) TBL
+        UNION ALL
+        SELECT AMM.menuGroupNo
+              ,AMM.menuName                AS menuGroupName
+              ,''                          AS menuGroupIcon
+              ,AMGM.sortNo                 AS menuGroupSortNo
+              ,AMM.menuNo
+              ,AMM.menuLink
+              ,2                           AS depth
+              ,AMM.sortNo                  AS menuSortNo
+              ,AMM.useFlag
+              ,COALESCE(AMRD.authCode, 0)  AS authCode
+        FROM   TAdminMgmt AM
+        INNER JOIN TAdminMenuRoleMgmt      AMRM ON AM.menuRoleNo    = AMRM.menuRoleNo
+        INNER JOIN TAdminMenuRoleDtl       AMRD ON AMRM.menuRoleNo  = AMRD.menuRoleNo
+        INNER JOIN TAdminMenuMgmt          AMM  ON AMRD.menuNo      = AMM.menuNo
+        INNER JOIN TAdminMenuGroupMgmt     AMGM ON AMGM.menuGroupNo = AMM.menuGroupNo
+        WHERE AM.adminID = #{adminID}
+        AND   AM.useFlag   = true
+        AND   AMM.useFlag  = true
+        AND   AMGM.sortNo != 0
+        ORDER BY menuGroupSortNo, depth, menuSortNo
+    </select>
+
+<!-- ##################################################
+    # 관리자 로그인 시 초기 페이지 셋팅 (접근 권한을 가지고 있는 메뉴 1개)
+    ################################################### -->
+    <select id="selectMenuLinkByLoginAction" parameterType="String" resultType="AdminMenu">
+         -- common.selectMenuLinkByLoginAction : 관리자 로그인 시 초기 페이지 셋팅 (접근 권한을 가지고 있는 메뉴 1개)
+         SELECT AMGM.menuGroupNo
+               ,AMGM.sortNo              AS menuGroupSortNo
+               ,AMM.menuNo
+               ,AMM.menuName
+               ,AMM.menuLink
+               ,AMM.sortNo
+               ,COALESCE(AMRD.authCode, 0) AS authCode
+        FROM TAdminMgmt AM
+        INNER JOIN TAdminMenuRoleMgmt  AMRM ON (AM.menuRoleNo   = AMRM.menuRoleNo)
+        INNER JOIN TAdminMenuRoleDtl   AMRD ON (AMRM.menuRoleNo = AMRD.menuRoleNo)
+        INNER JOIN TAdminMenuMgmt      AMM  ON (AMRD.menuNo     = AMM.menuNo)
+        INNER JOIN TAdminMenuGroupMgmt AMGM ON (AMM.menuGroupNo = AMGM.menuGroupNo)
+        WHERE AM.adminID   = #{adminID}
+        AND   AM.useFlag   = true
+        AND   AMM.useFlag  = true
+        AND   AMGM.useFlag = true
+        ORDER BY AMGM.sortNo, AMM.sortNo
+        LIMIT 1
+    </select>
+</mapper>

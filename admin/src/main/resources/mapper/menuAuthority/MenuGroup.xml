@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 메뉴 그룹 Mapper ■ payletter ■ 2018. 4. 6.
+     ################################################## -->
+<mapper namespace="menuGroup">
+<!-- ##################################################
+    # 메뉴 그룹 목록 조회 Body 영역
+    ################################################### -->
+    <sql id="selectMenuGroupListBody">
+        SELECT AMGM.menuGroupNo
+              ,AMGM.menuGroupName
+              ,AMGM.menuGroupIcon
+              ,AMGM.sortNo
+              ,AMGM.adminNo
+              ,AM.adminID
+              ,AMGM.useFlag
+              ,TO_CHAR(AMGM.regDate,'YYYY-MM-DD HH24:MI:SS') AS regDate
+              ,TO_CHAR(AMGM.updDate,'YYYY-MM-DD HH24:MI:SS') AS updDate
+        FROM   TAdminMenuGroupMgmt AMGM
+        LEFT OUTER JOIN TAdminMgmt AM ON (AMGM.adminNo = AM.adminNo)
+    </sql>
+
+<!-- ##################################################
+    # 메뉴 그룹 목록 조회 Where 영역
+    ################################################### -->
+    <sql id="sqlMenuGroupListWhere">
+        <where>
+            <if test="menuGroupNo != null and menuGroupNo != ''">
+                AND AMGM.menuGroupNo = #{menuGroupNo}
+            </if>
+        </where>
+    </sql>
+
+<!-- ##################################################
+    # 메뉴 그룹 목록 조회 Where 영역
+    ################################################### -->
+    <select id="selectMenuGroupList" parameterType="MenuGroup" resultType="MenuGroup">
+        -- menuGroup.selectMenuGroupList : 메뉴 그룹 목록 조회
+        <include refid="selectMenuGroupListBody"/>
+        <include refid="sqlMenuGroupListWhere"/>
+        ORDER BY sortNo
+    </select>
+
+<!-- ##################################################
+    # 메뉴 그룹 Merge
+    ################################################### -->
+    <update id="mergeMenuGroup" parameterType="MenuGroup">
+        -- menuGroup.mergeMenuGroup : 메뉴 그룹 Merge
+        <selectKey keyProperty="createSortNo" resultType="short" order="BEFORE">
+            SELECT COALESCE(#{sortNo}, MAX(sortNo)) + 1
+            FROM   TAdminMenuGroupMgmt
+        </selectKey>
+        WITH MERGE AS (
+            UPDATE TAdminMenuGroupMgmt
+            SET menuGroupIcon = #{menuGroupIcon}
+               ,menuGroupName = #{menuGroupName}
+               ,sortNo        = #{sortNo}
+               ,useFlag       = #{useFlag}
+               ,adminNo       = #{adminNo}
+               ,updDate       = NOW()
+            WHERE menuGroupNo = #{menuGroupNo}
+            RETURNING *
+        )
+        INSERT INTO TAdminMenuGroupMgmt (menuGroupIcon, menuGroupName, sortNo, adminNo, useFlag)
+        SELECT #{menuGroupIcon}, #{menuGroupName}, #{createSortNo}, #{adminNo}, #{useFlag}
+        WHERE NOT EXISTS (SELECT * FROM MERGE)
+    </update>
+
+<!-- ##################################################
+    # 메뉴 그룹 정렬 순서 조정
+    ################################################### -->
+    <update id="updateMenuGroup" parameterType="MenuGroup">
+        -- menuGroup.updateMenuGroupSort : 메뉴 그룹 삭제 후 Sort 업데이트
+        UPDATE TAdminMenuGroupMgmt
+        SET    sortNo     = #{sortNo}
+              ,adminNo    = #{adminNo}
+              ,updDate    = NOW()
+        WHERE menuGroupNo = #{menuGroupNo}
+    </update>
+</mapper>

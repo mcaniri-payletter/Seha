@@ -1,0 +1,118 @@
+<!------------------------------------------------------------------------
+# Author : payletter
+# Desc   : 관리자 비밀번호 초기화 View
+# Date   : 2020.01.23
+#------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="text/html;charset=UTF-8" />
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <title th:text="${@environment.getProperty('browser.title')}"></title>
+        <!-- 공통 CSS 영역 -->
+        <th:block th:include="layout/config :: common_css"></th:block>
+        <!-- Custom CSS 영역 -->
+        <th:block layout:fragment="customCSS"></th:block>
+        <!-- 공통 Javascript 영역 -->
+        <th:block th:include="layout/config :: common_js"></th:block>
+    </head>
+    <body class="hold-transition login-page">
+        <div class="login-box">
+            <div class="login-logo">&nbsp;</div>
+            <div class="login-box-body">
+                <form id="frmInitPwd">
+                    <div class="login-box-msg">
+                        <i class="fa fa-unlock-alt fa-2x"></i>
+                        <h5 id="modalPwdChange" class="basic-align-center" th:text="#{'login.initPwd'}">비밀번호 초기화</h5>
+                    </div>
+                    <div class="row form-row">
+                        <div class="col-md-12">
+                            <p><th:block th:text="#{'common.label.adminID'}"></th:block> : <span id="spAdminID" th:text="${adminID }"></span></p>
+                            <input type="hidden" id="hidToken" name="strToken" th:value="${token }"/>
+                        </div>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input class="form-control" type="password" id="txtNewPwd" name="strNewPwd" th:placeholder="#{'login.msgInputNewPwd'}" style="font-family: Arial;" maxlength="20">
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input class="form-control" type="password" id="txtReNewPwd" name="strReNewPwd" th:placeholder="#{'login.msgInputReNewPwd'}" style="font-family: Arial;" maxlength="20">
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 basic-align-right">
+                            <button type="button" id="btnCancel" class="btn btn-default btn-sm" data-dismiss="modal" th:text="#{'common.label.cancel'}">취소</button>
+                            <button type="button" id="btnResetPwd" class="btn btn-danger btn-sm" th:text="#{'login.initPwd'}">비밀번호 초기화</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 공통 Modal 영역 -->
+        <th:block th:replace="layout/modal :: modalFragment"></th:block>
+
+        <th:block layout:fragment="customJS">
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+
+                $(function() {
+                    fnSetInitAdminPwdFormValidate();
+                    fnInitAdminPwdEvent();
+                });
+
+                /**------------------------------------------------------------
+                 * 비밀번호 초기화 유효성 이벤트
+                 ------------------------------------------------------------*/
+                function fnSetInitAdminPwdFormValidate() {
+                    var arrValidate = {
+                        FORMID  : "frmInitPwd",
+                        VARIABLE: {
+                            strNewPwd  : { required: true, maxlength: 20, minlength: 8, passwordCheck: true, pwCheckConsecChars: true },
+                            strReNewPwd: { required: true, maxlength: 20, minlength: 8, equalTo: "#txtNewPwd", passwordCheck: true, pwCheckConsecChars: true }
+                        }
+                    }
+
+                    COMMON.Utils.fnSetValidate(arrValidate);
+                }
+
+                function fnInitAdminPwdEvent() {
+                    $("#btnInitPwdModal").click();
+
+                    $("#btnResetPwd").on("click", function() {
+                        if(!$("#frmInitPwd").valid()) {
+                            return;
+                        }
+
+                        var obj = {
+                            requestData : {
+                                adminID : $("#spAdminID").text(),
+                                token   : $("#hidToken").val(),
+                                newPwd  : $("#txtNewPwd").val(),
+                                reNewPwd: $("#txtReNewPwd").val()
+                            },
+                            strCallUrl  : "/administrator/administrator/resetPwd",
+                            strCallBack : "fnRedirect"
+                        };
+
+                        COMMON.Ajax.fnRequest(obj);
+                    });
+
+                    $("#btnCancel").on("click", function() {
+                        document.location.href = "/login";
+                    });
+                }
+
+                function fnRedirect() {
+                    var strAdminID = $("#spAdminID").text();
+                    document.location.href = "/login?inpAdminID=" + strAdminID;
+                }
+
+                /*]]>*/
+            </script>
+        </th:block>
+    </body>
+</html>

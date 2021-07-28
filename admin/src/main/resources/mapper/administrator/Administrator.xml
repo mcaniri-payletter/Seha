@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ##################################################
+     # ■ 관리자 Mapper ■ payletter ■ 2018. 4. 11.
+     ################################################### -->
+<mapper namespace="administrator">
+<!-- ##################################################
+    # 관리자 정보 조회
+    ################################################### -->
+    <select id="selectAdministratorInfo" parameterType="String" resultType="Administrator">
+        -- administrator.selectAdministratorInfo : 관리자 정보 조회
+        SELECT AM.adminNo
+               ,AM.adminID
+               ,AM.adminPwd
+               ,AM.adminName
+               ,AM.menuRoleNo
+               ,AM.celNo
+               ,AM.email
+               ,'ko'
+               ,AM.accessIPRestrictFlag
+               ,COALESCE(AM.accessIP1, '0.0.0.0')               AS accessIP1
+               ,COALESCE(AM.accessIP2, '0.0.0.0')               AS accessIP2
+               ,COALESCE(AM.accessIP3, '0.0.0.0')               AS accessIP3
+               ,TO_CHAR(COALESCE(AM.pwdUpdDate, AM.regDate), 'YYYY-MM-DD HH24:MI:SS') AS pwdUpdDate
+               ,COALESCE(AM.pwdUpdDate, AM.regDate)            AS dtPwdUpdDate
+               ,TO_CHAR(COALESCE(AM.lastLoginDate, NOW()), 'YYYY-MM-DD HH24:MI:SS') AS lastLoginDate
+               ,COALESCE(AM.lastLoginDate, NOW())  AS dtLastLoginDate
+               ,COALESCE(AM.lastLoginIP, 'First Login')        AS lastLoginIP
+               ,AM.regAdminNo
+               ,(SELECT adminName FROM TAdminMgmt WHERE adminNo = AM.regAdminNo) AS regAdminName
+               ,AM.useFlag
+               ,TO_CHAR(AM.regDate, 'YYYY-MM-DD HH24:MI:SS') AS regDate
+               ,TO_CHAR(AM.updDate, 'YYYY-MM-DD HH24:MI:SS') AS updDate
+        FROM   TAdminMgmt AM
+        WHERE  AM.adminID = #{adminID}
+    </select>
+
+<!-- ##################################################
+    # 관리자 목록 조회 Count 영역
+    ################################################### -->
+    <select id="selectAdministratorCnt" resultType="int">
+        -- administrator.selectAdministratorCnt : 관리자 목록 개수
+        SELECT COUNT(*)
+        FROM   TAdminMgmt AM
+        <include refid="sqlAdministratorListWhere" />
+    </select>
+
+    <!-- ##################################################
+    # 관리자 목록 조회 Body 영역
+    ################################################### -->
+    <sql id="sqlAdministratorListBody">
+        SELECT AM.adminNo
+               ,AM.adminName
+               ,AM.adminID
+               ,AM.celNo
+               ,AM.email
+               ,AM.menuRoleNo
+               ,AMRM.menuRoleName
+               ,AM.useFlag
+               ,AM.accessIPRestrictFlag
+               ,AM.accessIP1
+               ,AM.accessIP2
+               ,AM.accessIP3
+               ,TO_CHAR(AM.lastLoginDate, 'YYYY-MM-DD HH24:MI:SS') AS strLastLoginDate
+               ,TO_CHAR(AM.regDate, 'YYYY-MM-DD HH24:MI:SS') AS regDate
+        FROM   TAdminMgmt AM
+        LEFT OUTER JOIN TAdminMenuRoleMgmt AMRM ON (AM.menuRoleNo = AMRM.menuRoleNo)
+    </sql>
+
+<!-- ##################################################
+    # 관리자 목록 조회 WHERE 영역
+    ################################################### -->
+    <sql id="sqlAdministratorListWhere">
+        <where>
+            <if test="adminNo != null and adminNo != 0">
+                AND AM.adminNo = #{adminNo}
+            </if>
+            <if test="adminName != null and adminName != ''">
+                AND AM.adminName LIKE CONCAT('%', #{adminName}, '%')
+            </if>
+            <if test="adminID != null and adminID !=''">
+                AND AM.adminID LIKE CONCAT('%', #{adminID}, '%')
+            </if>
+            <if test="celNo != null and celNo !=''">
+                AND AM.celNo LIKE CONCAT('%', #{celNo}, '%')
+            </if>
+            <if test="email != null and email !=''">
+                AND AM.email LIKE CONCAT('%', #{email}, '%')
+            </if>
+            <if test="useFlag != null">
+                AND AM.useFlag = #{useFlag}
+            </if>
+        </where>
+    </sql>
+
+<!-- ##################################################
+    # 관리자 목록 조회 (페이징)
+    ################################################### -->
+    <select id="selectAdministratorList" parameterType="administrator" resultType="administrator">
+        -- administrator.selectAdministratorList : 관리자 목록 조회
+        <include refid="sqlAdministratorListBody"/>
+        <include refid="sqlAdministratorListWhere"/>
+        <include refid="common.sqlCommonSort"/>
+        <include refid="common.pagingSuffix"/>
+    </select>
+
+<!-- ##################################################
+    # 관리자 등록
+    ################################################### -->
+    <insert id="insertAdministrator" parameterType="Administrator">
+        <selectKey keyProperty="adminNo" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+            -- administrator.insertAdministrator : 관리자 등록
+            INSERT INTO TAdminMgmt (adminId, adminPwd, adminName, menuRoleNo, celNo
+                                    ,email, useLanguageTypeCode, accessIPRestrictFlag, accessIP1, accessIP2
+                                    ,accessIP3, pwdUpdDate, regAdminNo, useFlag)
+                            VALUES (#{adminID}, #{adminPwd}, #{adminName}, #{menuRoleNo}, #{celNo}
+                                   ,#{email}, 'ko', #{accessIPRestrictFlag}, #{accessIP1}, #{accessIP2}
+                                   ,#{accessIP3}, NOW(), #{regAdminNo}, #{useFlag})
+    </insert>
+
+<!-- ##################################################
+    # 관리자 수정
+    ################################################### -->
+    <update id="updateAdministrator" parameterType="Administrator">
+        -- administrator.updateAdministrator : 관리자 수정
+        UPDATE TAdminMgmt
+        SET    adminName             = #{adminName}
+              ,menuRoleNo            = #{menuRoleNo}
+              ,celNo                 = #{celNo}
+              ,email                 = #{email}
+              ,accessIPRestrictFlag  = #{accessIPRestrictFlag}
+              ,accessIP1             = #{accessIP1}
+              ,accessIP2             = #{accessIP2}
+              ,accessIP3             = #{accessIP3}
+              ,regAdminNo            = #{regAdminNo}
+              ,useFlag               = #{useFlag}
+              ,updDate               = NOW()
+        WHERE  adminID               = #{adminID}
+    </update>
+
+<!-- ##################################################
+    # 관리자 수정 (항목별)
+    ################################################### -->
+    <update id="updateAdministratorByItem" parameterType="Administrator">
+        -- administrator.updateAdministratorByItem : 관리자 수정 (항목별)
+        UPDATE TAdminMgmt
+        SET    regAdminNo = #{adminNo}
+              ,updDate    = NOW()
+        <if test="useFlag != null">
+              ,useFlag    = #{useFlag}
+        </if>
+        <if test="newPwd != null and newPwd != ''">
+              ,adminPwd   = #{newPwd}
+              ,pwdUpdDate = NOW()
+        </if>
+        WHERE  adminID    = #{adminID}
+    </update>
+
+<!-- ##################################################
+    # 비밀번호 초기화 정보 입력
+    ################################################### -->
+    <insert id="insertAdministratorPwdReset" parameterType="Administrator">
+        -- administrator.insertAdministratorPwdReset : 비밀번호 초기화 정보 입력
+        INSERT INTO TAdminPwdReset (adminNo, token, authFlag, authExpDate)
+                            VALUES (#{adminNo}, #{token}, 0, DATE_ADD(NOW(), INTERVAL 60 MINUTE))
+    </insert>
+
+<!-- ##################################################
+    # 비밀번호 초기화 요청 유저 정보 조회
+    ################################################### -->
+    <select id="selectResetPwdAdminInfo" parameterType="String" resultType="Administrator">
+        -- administrator.selectResetPwdAdminInfo : 비밀번호 초기화 요청 유저 정보 조회
+        SELECT APR.adminNo
+               ,AM.adminID
+               ,APR.authFlag
+               ,APR.authExpDate
+        FROM   TAdminPwdReset APR
+        INNER JOIN TAdminMgmt AM ON (APR.adminNo = AM.adminNo)
+        WHERE  token = #{token}
+    </select>
+
+<!-- ##################################################
+    # 비밀번호 변경 이력 등록
+    ################################################### -->
+    <insert id="insertAdminPwdChangeHist" parameterType="String">
+        -- administrator.insertAdminPwdChangeHist : 비밀번호 변경 이력 등록
+        INSERT INTO TAdminPwdChangeHist (adminNo, adminPwd)
+                SELECT AM.adminNo
+                      ,AM.adminPwd
+                FROM   TAdminMgmt AM
+                WHERE  AM.adminID = #{adminID}
+    </insert>
+
+<!-- ##################################################
+    # 관리자 비밀번호 조회
+    ################################################### -->
+    <select id="selectAdminPwd" parameterType="String" resultType="String">
+        -- administrator.selectAdminPwd : 관리자 비밀번호 조회
+        SELECT AM.adminPwd
+        FROM   TAdminMgmt AM
+        WHERE  AM.adminID = #{adminID}
+    </select>
+
+<!-- ##################################################
+    # 관리자 비밀번호 초기화 정보 수정
+    ################################################### -->
+    <update id="updateAdminPwdReset" parameterType="Login">
+        -- administrator.updateAdminPwdReset : 관리자 비밀번호 초기화 정보 수정
+        UPDATE TAdminPwdReset
+        SET    authFlag = 1
+              ,updDate  = NOW()
+        WHERE  token    = #{token}
+    </update>
+</mapper>
